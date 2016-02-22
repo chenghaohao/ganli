@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- configuration{appender{encoder{pattern}},logger(name[,level,addtivity]){appender-ref},root(level){appender-ref},[contextName,property]} -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<withJansi>true</withJansi>
+		<encoder>
+			<pattern>
+				<!-- %d{HH:mm:ss.SSS} [%thread] %-5level %c.%M\(%F:%L\) - %msg%n -->
+				%d{HH:mm:ss.SSS} [%thread] %-5level %logger{18}\(%F:%L\) - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${catalina.home}/logs/mls.log</File>
+		<!--<File>D:/logs/mls.log</File>-->
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %c.%M - %msg%n
+			</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${catalina.home}/logs/uc.log.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	<logger name="com.karakal.usercenter.dao" level="DEBUG"/>
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+		 <appender-ref ref="FILE" />
+	</root>
+</configuration>

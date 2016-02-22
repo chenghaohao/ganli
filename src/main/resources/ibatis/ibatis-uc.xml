@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ganli.dao.Test">
+    <!--<resultMap id="projectMap" type="com.karakal.usercenter.entity.Project">-->
+        <!--<id column="id" property="id" jdbcType="INTEGER"/>-->
+        <!--<result column="name" property="name" jdbcType="VARCHAR"/>-->
+        <!--<result column="cycle" property="cycle" jdbcType="VARCHAR"/>-->
+        <!--<result column="start" property="start" jdbcType="VARCHAR"/>-->
+        <!--<result column="end" property="end" jdbcType="VARCHAR"/>-->
+        <!--<result column="flow" property="flow" jdbcType="INTEGER"/>-->
+        <!--<result column="fileurl" property="fileUrl" jdbcType="VARCHAR"/>-->
+        <!--<result column="status" property="status" jdbcType="INTEGER"/>-->
+        <!--<result column="ctime" property="cTime" jdbcType="TIMESTAMP"/>-->
+        <!--<result column="cname" property="cname" jdbcType="VARCHAR"/>-->
+
+    <!--</resultMap>-->
+
+    <!--&lt;!&ndash;没有即插入新项目有则更新旧项目&ndash;&gt;-->
+    <!--<insert id="saveProject" parameterType="com.karakal.usercenter.entity.Project" useGeneratedKeys="true" keyProperty="id">-->
+        <!--INSERT INTO uc_project-->
+        <!--<trim prefix="(" suffix=")" suffixOverrides=",">-->
+            <!--<if test="id != null and id != ''">-->
+                <!--id,-->
+            <!--</if>-->
+            <!--name,cycle,start,end,flow,fileurl,status,ctime,cname-->
+        <!--</trim>-->
+        <!--<trim prefix="values(" suffix=")" suffixOverrides=",">-->
+            <!--<if test="id != null and id != ''">-->
+                <!--#{id},-->
+            <!--</if>-->
+            <!--#{name},#{cycle},#{start},#{end},#{flow},#{fileUrl},0,now(),#{cname}-->
+        <!--</trim>-->
+        <!--ON DUPLICATE KEY UPDATE-->
+        <!--<trim suffixOverrides=",">-->
+            <!--<if test="name != null and name != ''">-->
+                <!--name=#{name},-->
+            <!--</if>-->
+            <!--<if test="cycle != null and cycle != ''">-->
+                <!--cycle=#{cycle},-->
+            <!--</if>-->
+            <!--<if test="start != null and start != ''">-->
+                <!--start=#{start},-->
+            <!--</if>-->
+            <!--<if test="end != null and end != ''">-->
+                <!--end=#{end},-->
+            <!--</if>-->
+            <!--<if test="flow != null and flow != ''">-->
+                <!--flow=#{flow},-->
+            <!--</if>-->
+            <!--<if test="fileUrl != null and fileUrl != ''">-->
+                <!--fileUrl=#{fileUrl},-->
+            <!--</if>-->
+            <!--<if test="status != null and status != ''">-->
+                <!--status=#{status},-->
+            <!--</if>-->
+            <!--<if test="cname != null and cname != ''">-->
+                <!--cname=#{cname}-->
+            <!--</if>-->
+        <!--</trim>-->
+    <!--</insert>-->
+    <!--&lt;!&ndash;分页查询项目&ndash;&gt;-->
+    <!--<select id="findProjectList" resultMap="projectMap" parameterType="java.util.Map">-->
+        <!--SELECT * FROM uc_project-->
+        <!--<where>-->
+            <!--<if test="project.id != null and project.id != ''">-->
+                <!--and id=#{project.id}-->
+            <!--</if>-->
+            <!--<if test="project.name != null and project.name != ''">-->
+                <!--and name LIKE CONCAT(CONCAT('%', #{project.name}), '%')-->
+            <!--</if>-->
+            <!--<if test="project.cycle != null and project.cycle != ''">-->
+                <!--and cycle=#{project.cycle}-->
+            <!--</if>-->
+            <!--<if test="project.start != null and project.start != ''">-->
+                <!--and start=#{project.start}-->
+            <!--</if>-->
+            <!--<if test="project.end != null and project.end != ''">-->
+                <!--and end=#{project.end}-->
+            <!--</if>-->
+            <!--<if test="project.cname != null and project.cname != ''">-->
+                <!--and cname=#{project.cname}-->
+            <!--</if>-->
+            <!--<if test="project.flow != null ">-->
+                <!--and flow in (#{project.flow})-->
+            <!--</if>-->
+            <!--<if test="project.fzr != null and project.fzr != ''">-->
+                <!--and id in(SELECT pid FROM uc_project_user WHERE uid in(#{project.fzr})  AND identity=0)-->
+            <!--</if>-->
+            <!--<if test="project.cyr != null and project.cyr != ''">-->
+                <!--and id in(SELECT pid FROM uc_project_user WHERE uid in(#{project.cyr}) AND identity=1)-->
+            <!--</if>-->
+            <!--and status &lt;&gt; 1-->
+        <!--</where>-->
+        <!--ORDER BY ctime DESC-->
+        <!--LIMIT #{firstIndex},#{maxResult}-->
+    <!--</select>-->
+    <!--&lt;!&ndash;插入项目2用户&ndash;&gt;-->
+    <!--<insert id="saveProUser" parameterType="java.util.List" useGeneratedKeys="true">-->
+        <!--<selectKey resultType="int" keyProperty="id" order="AFTER">-->
+            <!--SELECT-->
+            <!--LAST_INSERT_ID()-->
+        <!--</selectKey>-->
+        <!--INSERT INTO uc_project_user(uid,uname,pid,identity,ctime)-->
+        <!--VALUES-->
+        <!--<foreach collection="list" item="item" index="index" separator="," >-->
+            <!--(#{item.uId},#{item.uName},#{item.pId},#{item.identity},now())-->
+        <!--</foreach>-->
+    <!--</insert>-->
+
+    <!--&lt;!&ndash;查询项目2用户&ndash;&gt;-->
+    <!--<select id="findProUser" parameterType="int" resultType="com.karakal.usercenter.entity.ProjectUser">-->
+        <!--SELECT * FROM uc_project_user WHERE pid=#{pId}-->
+    <!--</select>-->
+
+    <!--&lt;!&ndash;更新任务表&ndash;&gt;-->
+    <!--<sql id="update_task">-->
+        <!--<if test="task.pId != null">-->
+            <!--pid=#{task.pId},-->
+        <!--</if>-->
+        <!--<if test="task.tId != null">-->
+            <!--tid=#{task.tId},-->
+        <!--</if>-->
+    <!--</sql>-->
+
+    <!--<update id="updateTask" parameterType="com.karakal.usercenter.entity.Task">-->
+        <!--UPDATE uc_task-->
+        <!--<set>-->
+            <!--<include refid="update_task"></include>-->
+            <!--<if test="userId != null and userId != ''">-->
+                <!--uid=#{userId},-->
+            <!--</if>-->
+            <!--<if test="task.status != null">-->
+                <!--status=#{task.status},-->
+            <!--</if>-->
+            <!--<if test="uidB != null and uidB != ''">-->
+                <!--uid_B=#{uidB},-->
+            <!--</if>-->
+            <!--<if test="task.tpType != null">-->
+            	<!--<if test="task.aBType == 'A'.toString()">-->
+               	 <!--tp_type=  CONCAT(#{task.tpType},IFNULL(right(tp_type,1),0)) ,-->
+                <!--</if>-->
+                <!--<if test="task.aBType == 'B'.toString()">-->
+               	 <!--tp_type=  CONCAT(IFNULL(left(tp_type,1),0),#{task.tpType}) ,-->
+                <!--</if>-->
+                <!--<if test="task.aBType == 'AB'.toString()">-->
+               	 <!--tp_type= #{task.tpType}  ,-->
+                <!--</if>-->
+            <!--</if>-->
+        <!--</set>-->
+        <!--<where>-->
+            <!--<if test="task.pId != null">-->
+                <!--and pid=#{task.pId}-->
+            <!--</if>-->
+            <!--<if test="task.tId != null">-->
+                <!--and tid=#{task.tId}-->
+            <!--</if>-->
+            <!--<if test="task.uId != null">-->
+                <!--and uid=#{task.uId}-->
+            <!--</if>-->
+            <!--<if test=" task.type =='cp'">-->
+           		<!--<if test="task.copyrightId != null">-->
+               	 <!--and copyright_id=#{task.copyrightId}-->
+                <!--</if>-->
+            <!--</if>-->
+            <!--<if test="task.type !='cp'">-->
+           		<!--<if test="task.copyrightId != null">-->
+                	<!--and tid=#{task.tId}-->
+           		 <!--</if>-->
+            <!--</if>-->
+            <!--<if test="task.isNotPid != null">-->
+               	<!--and pid  &lt;&gt; #{task.isNotPid}-->
+            <!--</if>-->
+
+        <!--</where>-->
+    <!--</update>-->
+    <!--<sql id="search_task">-->
+        <!--<if test="task.id != null">-->
+            <!--and id = #{task.id}-->
+        <!--</if>-->
+        <!--<if test="task.pId != null">-->
+            <!--and pid = #{task.pId}-->
+        <!--</if>-->
+        <!--<if test="task.tId != null">-->
+            <!--and tid = #{task.tId}-->
+        <!--</if>-->
+        <!--<if test="task.copyrightId != null">-->
+            <!--and copyright_id = #{task.copyrightId}-->
+        <!--</if>-->
+        <!--<if test="task.status != null">-->
+            <!--and status = #{task.status}-->
+        <!--</if>-->
+        <!--<if test="task.uId != null">-->
+            <!--and uid = #{task.uId}-->
+        <!--</if>-->
+        <!--<if test="task.cTime != null">-->
+            <!--and ctime = #{task.cTime}-->
+        <!--</if>-->
+        <!--<if test="task.uidB != null">-->
+            <!--and uid_B = #{task.uidB}-->
+        <!--</if>-->
+        <!--<if test="task.tpType != null">-->
+            <!--and tp_type = #{task.tpType}-->
+        <!--</if>-->
+
+
+    <!--</sql>-->
+    <!--<select id="findTask" parameterType="hashMap" resultType="com.karakal.usercenter.entity.Task">-->
+        <!--SELECT a.id,a.pid,a.tid,a.status,a.uid,a.ctime,a.copyright_id as copyrightId,a.uid_b as uidB ,a.tp_type as tpType FROM uc_task a-->
+        <!--<where>-->
+            <!--<include refid="search_task"></include>-->
+        <!--</where>-->
+        <!--LIMIT #{firstIndex},#{maxResult}-->
+    <!--</select>-->
+
+      <!--<select id="findTaskAndOtherIds" parameterType="hashMap" resultType="com.karakal.usercenter.entity.Task">-->
+        <!--SELECT a.tid ,a.pid, GROUP_CONCAT( DISTINCT c.artist_id) artistIds,GROUP_CONCAT( DISTINCT e.album_id)albumIds  FROM uc_task a LEFT JOIN m_song_artist b  on a.tid=b.song_id LEFT JOIN m_artist c  on  b.artist_id=c.artist_id LEFT JOIN m_song_album d on a.tid=d.song_id LEFT JOIN m_album e on e.album_id=d.album_id-->
+        <!--<where>-->
+            <!--<include refid="search_task"></include>-->
+        <!--</where>-->
+        <!--GROUP BY a.tid ,a.pid-->
+        <!--LIMIT #{firstIndex},#{maxResult}-->
+    <!--</select>-->
+
+
+    <!--<select id="countTask" parameterType="com.karakal.usercenter.entity.Task" resultType="int" >-->
+        <!--SELECT count(*) FROM uc_task-->
+        <!--<where>-->
+            <!--<if test="id != null and id != ''">-->
+                <!--and id = #{id}-->
+            <!--</if>-->
+            <!--<if test="pId != null and pId != ''">-->
+                <!--and pid = #{pId}-->
+            <!--</if>-->
+            <!--<if test="tId != null and tId != ''">-->
+                <!--and tid = #{tId}-->
+            <!--</if>-->
+            <!--<if test="status != null">-->
+                <!--and status = #{status}-->
+            <!--</if>-->
+            <!--<if test="uId != null and uId != ''">-->
+                <!--and uid = #{uId}-->
+            <!--</if>-->
+            <!--<if test="cTime != null and cTime != ''">-->
+                <!--and ctime = #{cTime}-->
+            <!--</if>-->
+        <!--</where>-->
+    <!--</select>-->
+    <!--<select id="countProject" parameterType="com.karakal.usercenter.entity.Project" resultType="int">-->
+        <!--SELECT count(*) FROM uc_project-->
+        <!--<where>-->
+            <!--<if test="id != null and id != ''">-->
+                <!--and id=#{id}-->
+            <!--</if>-->
+            <!--<if test="name != null and name != ''">-->
+                <!--and name LIKE CONCAT(CONCAT('%', #{name}), '%')-->
+            <!--</if>-->
+            <!--<if test="cycle != null and cycle != ''">-->
+                <!--and cycle=#{cycle}-->
+            <!--</if>-->
+            <!--<if test="start != null and start != ''">-->
+                <!--and start=#{start}-->
+            <!--</if>-->
+            <!--<if test="end != null and end != ''">-->
+                <!--and end=#{end}-->
+            <!--</if>-->
+            <!--<if test="flow != null and flow != ''">-->
+                <!--and flow=#{flow}-->
+            <!--</if>-->
+            <!--<if test="cname != null and cname != ''">-->
+                <!--and cname=#{cname}-->
+            <!--</if>-->
+            <!--and status &lt;&gt; 1-->
+        <!--</where>-->
+    <!--</select>-->
+
+
+    <!--&lt;!&ndash;删除delProjectUserByPIds&ndash;&gt;-->
+    <!--<delete id="delProjectUserByPIds" parameterType="int">-->
+ 		 <!--DELETE FROM uc_project_user WHERE pid in-->
+ 		 <!--<foreach collection="list" item="ids" open="(" separator="," close=")">-->
+	        <!--#{ids}-->
+	     <!--</foreach>-->
+	<!--</delete>-->
+
+	  <!--&lt;!&ndash;通过用户名查询项目名称&ndash;&gt;-->
+    <!--<select id="findProjectByUid" parameterType="int" resultType="com.karakal.usercenter.entity.Project">-->
+          <!--SELECT a.name FROM  uc_project a,uc_project_user b where a.id=b.pid and uid=#{userId}-->
+    <!--</select>-->
+
+    <!--&lt;!&ndash;插入任务表,如果类型为cp&ndash;&gt;-->
+    <!--<insert id="saveTask" parameterType="hashMap" useGeneratedKeys="true">-->
+        <!--<selectKey resultType="int" keyProperty="id" order="AFTER">-->
+            <!--SELECT-->
+            <!--LAST_INSERT_ID()-->
+        <!--</selectKey>-->
+          <!--<if test="type =='cp'">-->
+                <!--INSERT INTO uc_task(uid,pid,copyright_id,status,ctime)-->
+          <!--</if>-->
+          <!--<if test="type =='song'">-->
+                <!--INSERT INTO uc_task(uid,uid_b,pid,tid,tp_type,ctime)-->
+          <!--</if>-->
+          <!--<if test="type !='cp' and type !='song'">-->
+                <!--INSERT INTO uc_task(uid,pid,tid,status,ctime)-->
+          <!--</if>-->
+         <!--VALUES-->
+        <!--<foreach collection="list" item="item" index="index" separator="," >-->
+          <!--<if test="type =='cp'">-->
+              <!--(#{item.uId},#{item.pId},#{item.copyrightId},#{item.status},now())-->
+          <!--</if>-->
+          <!--<if test="type =='song'">-->
+         	  <!--(#{item.uId},#{item.uidB},#{item.pId},#{item.tId},#{item.tpType},now())-->
+          <!--</if>-->
+          <!--<if test="type !='cp' and type !='song'">-->
+              <!--(#{item.uId},#{item.pId},#{item.tId},#{item.status},now())-->
+          <!--</if>-->
+        <!--</foreach>-->
+        <!--ON DUPLICATE KEY UPDATE ctime=NOW()-->
+    <!--</insert>-->
+
+    <!--&lt;!&ndash; 查询任务通过pid和tid &ndash;&gt;-->
+     <!--<select id="findTaskByTidAndPId" parameterType="hashMap" resultType="Object">-->
+       <!--<if test="type !='cp'">-->
+       	 <!--SELECT   tid FROM uc_task  where  pid = #{pId} 	and tid in-->
+       <!--</if>-->
+        <!--<if test="type =='cp'">-->
+       	 <!--SELECT copyright_id FROM uc_task  where  pid = #{pId} and copyright_id in-->
+       <!--</if>-->
+      <!--<foreach collection="list" item="tId" open="(" separator="," close=")">-->
+	        <!--#{tId}-->
+	  <!--</foreach>-->
+   <!--</select>-->
+
+    <!--&lt;!&ndash;查询歌曲id&ndash;&gt;-->
+    <!--<select id="findSongId" resultType="Object" parameterType="java.util.Map">-->
+         <!--SELECT a.song_id from m_song a ,m_song_artist b,m_artist c where a.song_id = b.song_id and c.artist_id=b.artist_id-->
+			<!--and a.song_name_only =#{songName} and c.artist_name_only =#{singerName}-->
+    <!--</select>-->
+
+    <!--&lt;!&ndash; 查询专辑 &ndash;&gt;-->
+    <!--<select id="findAlbumByIds"  parameterType="Object" resultType="com.karakal.usercenter.entity.Album">-->
+      <!--SELECT album_id as albumId,album_name as albumName FROM m_album  where  album_id  in-->
+      <!--<foreach collection="list" item="ids" open="(" separator="," close=")">-->
+	        <!--#{ids}-->
+	  <!--</foreach>-->
+   <!--</select>-->
+
+    <!--&lt;!&ndash; 查询艺人 &ndash;&gt;-->
+    <!--<select id="findArtistByIds"  parameterType="Object" resultType="com.karakal.usercenter.entity.Artist">-->
+      <!--SELECT artist_id as artistId,artist_name as artistName FROM m_artist  where artist_id  in-->
+      <!--<foreach collection="list" item="ids" open="(" separator="," close=")">-->
+	        <!--#{ids}-->
+	  <!--</foreach>-->
+   <!--</select>-->
+
+
+    <!--<select id="countTaskAndOtherIds" parameterType="hashMap" resultType="int" >-->
+	    <!--SELECT count(k.tid) from (-->
+		<!--SELECT  a.tid,a.pid  FROM uc_task a LEFT JOIN m_song_artist b  on a.tid=b.song_id LEFT JOIN m_artist c  on  b.artist_id=c.artist_id LEFT JOIN m_song_album d on a.tid=d.song_id LEFT JOIN m_album e on e.album_id=d.album_id-->
+	   <!--<where>-->
+	        <!--<include refid="search_task"></include>-->
+	    <!--</where>-->
+		<!--GROUP BY a.tid ,a.pid-->
+		<!--) k-->
+    <!--</select>-->
+</mapper>
