@@ -150,10 +150,11 @@
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat6-maven-plugin</artifactId>
                 <configuration>
+                    <ignorePackaging>true</ignorePackaging>
                     <uriEncoding>UTF-8</uriEncoding>
                     <url>http://localhost:8080/manager/html</url>
                     <server>tomcat-local</server>
-                    <path>/uc</path>
+                    <path>/ganli</path>
                     <contextReloadable>true</contextReloadable>
                     <port>8080</port>
                 </configuration>
@@ -173,7 +174,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
-                    <warName>uc</warName>
+                    <warName>ganli</warName>
                 </configuration>
             </plugin>
             <plugin>
