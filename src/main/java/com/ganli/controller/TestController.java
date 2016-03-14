@@ -22,8 +22,8 @@ public class TestController extends BaseController{
         Map<String,Object> map = new HashMap<String, Object>();
         map.put("姓名","程浩");
         map.put("职位","开发工程师");
-        System.out.print(Constants.MSG_URL);
-        SendMsgUtil.sendMsg("13408686073","礼金理账号注册手机验证码:2333");
+//        System.out.print(Constants.MSG_URL);
+//        SendMsgUtil.sendMsg("13408686073","礼金理账号注册手机验证码:2333");
         return jsonpHandler(map,callback);
     }
 }

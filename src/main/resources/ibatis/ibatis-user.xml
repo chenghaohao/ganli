@@ -1,63 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ganli.dao.Test">
-    <!--<resultMap id="projectMap" type="com.karakal.usercenter.entity.Project">-->
-        <!--<id column="id" property="id" jdbcType="INTEGER"/>-->
-        <!--<result column="name" property="name" jdbcType="VARCHAR"/>-->
-        <!--<result column="cycle" property="cycle" jdbcType="VARCHAR"/>-->
-        <!--<result column="start" property="start" jdbcType="VARCHAR"/>-->
-        <!--<result column="end" property="end" jdbcType="VARCHAR"/>-->
-        <!--<result column="flow" property="flow" jdbcType="INTEGER"/>-->
-        <!--<result column="fileurl" property="fileUrl" jdbcType="VARCHAR"/>-->
-        <!--<result column="status" property="status" jdbcType="INTEGER"/>-->
-        <!--<result column="ctime" property="cTime" jdbcType="TIMESTAMP"/>-->
-        <!--<result column="cname" property="cname" jdbcType="VARCHAR"/>-->
+<mapper namespace="com.ganli.dao.UserDao">
+    <resultMap id="userMap" type="com.ganli.entity.User">
+        <id column="user_uid" property="userUid" jdbcType="VARCHAR"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="user_sex" property="userSex" jdbcType="INTEGER"/>
+        <result column="user_phone" property="userPhone" jdbcType="VARCHAR"/>
+        <result column="user_location" property="userLocation" jdbcType="VARCHAR"/>
+        <result column="user_pwd" property="userPwd" jdbcType="VARCHAR"/>
+    </resultMap>
 
-    <!--</resultMap>-->
-
-    <!--&lt;!&ndash;没有即插入新项目有则更新旧项目&ndash;&gt;-->
-    <!--<insert id="saveProject" parameterType="com.karakal.usercenter.entity.Project" useGeneratedKeys="true" keyProperty="id">-->
-        <!--INSERT INTO uc_project-->
-        <!--<trim prefix="(" suffix=")" suffixOverrides=",">-->
-            <!--<if test="id != null and id != ''">-->
-                <!--id,-->
-            <!--</if>-->
-            <!--name,cycle,start,end,flow,fileurl,status,ctime,cname-->
-        <!--</trim>-->
-        <!--<trim prefix="values(" suffix=")" suffixOverrides=",">-->
-            <!--<if test="id != null and id != ''">-->
-                <!--#{id},-->
-            <!--</if>-->
-            <!--#{name},#{cycle},#{start},#{end},#{flow},#{fileUrl},0,now(),#{cname}-->
-        <!--</trim>-->
-        <!--ON DUPLICATE KEY UPDATE-->
-        <!--<trim suffixOverrides=",">-->
-            <!--<if test="name != null and name != ''">-->
-                <!--name=#{name},-->
-            <!--</if>-->
-            <!--<if test="cycle != null and cycle != ''">-->
-                <!--cycle=#{cycle},-->
-            <!--</if>-->
-            <!--<if test="start != null and start != ''">-->
-                <!--start=#{start},-->
-            <!--</if>-->
-            <!--<if test="end != null and end != ''">-->
-                <!--end=#{end},-->
-            <!--</if>-->
-            <!--<if test="flow != null and flow != ''">-->
-                <!--flow=#{flow},-->
-            <!--</if>-->
-            <!--<if test="fileUrl != null and fileUrl != ''">-->
-                <!--fileUrl=#{fileUrl},-->
-            <!--</if>-->
-            <!--<if test="status != null and status != ''">-->
-                <!--status=#{status},-->
-            <!--</if>-->
-            <!--<if test="cname != null and cname != ''">-->
-                <!--cname=#{cname}-->
-            <!--</if>-->
-        <!--</trim>-->
-    <!--</insert>-->
+    <!--没有即插入新用户有则更新旧用户-->
+    <insert id="saveUser" parameterType="com.ganli.entity.User" useGeneratedKeys="true" keyProperty="userUid">
+        INSERT INTO user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userUid != null and userUid != ''">
+                user_uid,
+            </if>
+            user_name,user_sex,user_phone,user_location,user_pwd
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="userUid != null and userUid != ''">
+                #{userUid},
+            </if>
+            #{userName},#{userSex},#{userPhone},#{userLocation},#{userPwd}
+        </trim>
+        ON DUPLICATE KEY UPDATE
+        <trim suffixOverrides=",">
+            <if test="userName != null and userName != ''">
+                user_name=#{userName},
+            </if>
+            <if test="userSex != null and userSex != ''">
+                user_sex=#{userSex},
+            </if>
+            <if test="userPhone != null and userPhone != ''">
+                user_phone=#{userPhone},
+            </if>
+            <if test="userLocation != null and userLocation != ''">
+                user_location=#{userLocation},
+            </if>
+            <if test="userPwd != null and userPwd != ''">
+                user_pwd=#{userPwd}
+            </if>
+        </trim>
+    </insert>
+    <select id="findUserByPhone" resultMap="userMap" parameterType="java.lang.String" >
+      SELECT * FROM user WHERE user_phone = #{phone}
+    </select>
+    <select id="findUserByPwd" resultMap="userMap" parameterType="java.lang.String" >
+        SELECT * FROM user WHERE user_pwd = #{pwd}
+    </select>
     <!--&lt;!&ndash;分页查询项目&ndash;&gt;-->
     <!--<select id="findProjectList" resultMap="projectMap" parameterType="java.util.Map">-->
         <!--SELECT * FROM uc_project-->
