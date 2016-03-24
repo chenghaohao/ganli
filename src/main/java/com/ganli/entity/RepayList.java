@@ -15,6 +15,8 @@ public class RepayList implements Serializable {
     private String repayRemark;             //还礼备注
     private String giftUid;                 //还礼单对应的收礼单id
     private String eventUid;                //还礼单对应的事件id
+    private String userUid;                 //用户id
+    private Integer repayStatus;             //还礼单状态
 
     public String getRepayUid() {
         return repayUid;
@@ -62,6 +64,22 @@ public class RepayList implements Serializable {
 
     public void setEventUid(String eventUid) {
         this.eventUid = eventUid;
+    }
+
+    public String getUserUid() {
+        return userUid;
+    }
+
+    public void setUserUid(String userUid) {
+        this.userUid = userUid;
+    }
+
+    public Integer getRepayStatus() {
+        return repayStatus;
+    }
+
+    public void setRepayStatus(Integer repayStatus) {
+        this.repayStatus = repayStatus;
     }
 
     @Override

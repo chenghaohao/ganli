@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ganli.dao.UserDao">
+<mapper namespace="com.ganli.dao.EventDao">
     <resultMap id="userMap" type="com.ganli.entity.User">
         <id column="user_uid" property="userUid" jdbcType="VARCHAR"/>
         <result column="user_name" property="userName" jdbcType="VARCHAR"/>
@@ -9,96 +9,135 @@
         <result column="user_location" property="userLocation" jdbcType="VARCHAR"/>
         <result column="user_pwd" property="userPwd" jdbcType="VARCHAR"/>
     </resultMap>
-
-    <!--没有即插入新用户有则更新旧用户-->
-    <insert id="saveUser" parameterType="com.ganli.entity.User" useGeneratedKeys="true" keyProperty="userUid">
-        INSERT INTO user
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userUid != null and userUid != ''">
-                user_uid,
-            </if>
-            user_name,user_sex,user_phone,user_location,user_pwd
-        </trim>
-        <trim prefix="values(" suffix=")" suffixOverrides=",">
-            <if test="userUid != null and userUid != ''">
-                #{userUid},
-            </if>
-            #{userName},#{userSex},#{userPhone},#{userLocation},#{userPwd}
-        </trim>
-        ON DUPLICATE KEY UPDATE
-        <trim suffixOverrides=",">
-            <if test="userName != null and userName != ''">
-                user_name=#{userName},
-            </if>
-            <if test="userSex != null and userSex != ''">
-                user_sex=#{userSex},
-            </if>
-            <if test="userPhone != null and userPhone != ''">
-                user_phone=#{userPhone},
-            </if>
-            <if test="userLocation != null and userLocation != ''">
-                user_location=#{userLocation},
-            </if>
-            <if test="userPwd != null and userPwd != ''">
-                user_pwd=#{userPwd}
-            </if>
-        </trim>
-    </insert>
-    <select id="findUserByPhone" resultMap="userMap" parameterType="java.lang.String" >
-      SELECT * FROM user WHERE user_phone = #{phone}
-    </select>
-    <select id="findUserByPwd" resultMap="userMap" parameterType="java.lang.String" >
-        SELECT * FROM user WHERE user_pwd = #{pwd}
-    </select>
-    <!--&lt;!&ndash;分页查询项目&ndash;&gt;-->
-    <!--<select id="findProjectList" resultMap="projectMap" parameterType="java.util.Map">-->
-        <!--SELECT * FROM uc_project-->
-        <!--<where>-->
-            <!--<if test="project.id != null and project.id != ''">-->
-                <!--and id=#{project.id}-->
-            <!--</if>-->
-            <!--<if test="project.name != null and project.name != ''">-->
-                <!--and name LIKE CONCAT(CONCAT('%', #{project.name}), '%')-->
-            <!--</if>-->
-            <!--<if test="project.cycle != null and project.cycle != ''">-->
-                <!--and cycle=#{project.cycle}-->
-            <!--</if>-->
-            <!--<if test="project.start != null and project.start != ''">-->
-                <!--and start=#{project.start}-->
-            <!--</if>-->
-            <!--<if test="project.end != null and project.end != ''">-->
-                <!--and end=#{project.end}-->
-            <!--</if>-->
-            <!--<if test="project.cname != null and project.cname != ''">-->
-                <!--and cname=#{project.cname}-->
-            <!--</if>-->
-            <!--<if test="project.flow != null ">-->
-                <!--and flow in (#{project.flow})-->
-            <!--</if>-->
-            <!--<if test="project.fzr != null and project.fzr != ''">-->
-                <!--and id in(SELECT pid FROM uc_project_user WHERE uid in(#{project.fzr})  AND identity=0)-->
-            <!--</if>-->
-            <!--<if test="project.cyr != null and project.cyr != ''">-->
-                <!--and id in(SELECT pid FROM uc_project_user WHERE uid in(#{project.cyr}) AND identity=1)-->
-            <!--</if>-->
-            <!--and status &lt;&gt; 1-->
-        <!--</where>-->
-        <!--ORDER BY ctime DESC-->
-        <!--LIMIT #{firstIndex},#{maxResult}-->
-    <!--</select>-->
+    <resultMap id="eventMap" type="com.ganli.entity.Event">
+        <id column="event_uid" property="eventUid" jdbcType="VARCHAR"/>
+        <result column="event_name" property="eventName" jdbcType="VARCHAR"/>
+        <result column="event_type" property="eventType" jdbcType="INTEGER"/>
+        <result column="event_location" property="eventLocation" jdbcType="VARCHAR"/>
+        <result column="event_time" property="eventTime" jdbcType="VARCHAR"/>
+        <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="giftMap" type="com.ganli.entity.GiftList">
+        <id column="gift_uid" property="giftUid" jdbcType="VARCHAR"/>
+        <result column="gift_person" property="giftPerson" jdbcType="VARCHAR"/>
+        <result column="gift_money" property="giftMoney" jdbcType="INTEGER"/>
+        <result column="gift_remark" property="giftRemark" jdbcType="VARCHAR"/>
+        <result column="event_uid" property="eventUid" jdbcType="VARCHAR"/>
+        <result column="gift_status" property="giftStatus" jdbcType="INTEGER"/>
+        <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="repayMap" type="com.ganli.entity.RepayList">
+        <id column="repay_uid" property="repayUid" jdbcType="VARCHAR"/>
+        <result column="repay_person" property="repayPerson" jdbcType="VARCHAR"/>
+        <result column="repay_money" property="repayMoney" jdbcType="INTEGER"/>
+        <result column="repay_remark" property="repayRemark" jdbcType="VARCHAR"/>
+        <result column="gift_uid" property="giftUid" jdbcType="VARCHAR"/>
+        <result column="event_uid" property="eventUid" jdbcType="VARCHAR"/>
+        <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
+        <result column="repay_status" property="repayStatus" jdbcType="INTEGER"/>
+    </resultMap>
+    <resultMap id="merchantMap" type="com.ganli.entity.Merchant">
+        <id column="merchant_uid" property="merchantUid" jdbcType="VARCHAR"/>
+        <result column="merchant_name" property="merchantName" jdbcType="VARCHAR"/>
+        <result column="merchant_img" property="merchantImg" jdbcType="VARCHAR"/>
+        <result column="merchant_desc" property="merchantDesc" jdbcType="INTEGER"/>
+        <result column="merchant_phone" property="merchantPhone" jdbcType="VARCHAR"/>
+        <result column="merchant_location" property="merchantLocation" jdbcType="VARCHAR"/>
+        <result column="merchant_score" property="merchantScore" jdbcType="VARCHAR"/>
+        <result column="merchant_type" property="merchantType" jdbcType="VARCHAR"/>
+    </resultMap>
      <!--批量插入事件-->
     <insert id="saveEvent" parameterType="java.util.List" useGeneratedKeys="true">
         <selectKey resultType="int" keyProperty="id" order="AFTER">
             SELECT
             LAST_INSERT_ID()
         </selectKey>
-        INSERT INTO event(event_uid,event_name,event_type,event_location,event_time,user_uid)
+        INSERT INTO event(event_uid,event_name,event_type,event_location,event_time,user_uid,event_status)
         VALUES
         <foreach collection="list" item="item" index="index" separator="," >
-            (#{item.eventUid},#{item.eventName},#{item.eventType},#{item.eventLocation},#{item.eventTime},#{item.userUid})
+            (#{item.eventUid},#{item.eventName},#{item.eventType},#{item.eventLocation},#{item.eventTime},#{item.userUid},0)
         </foreach>
     </insert>
+    <update id="updateEvent" parameterType="int" >
+        UPDATE event SET event_status=#{status} WHERE user_uid=#{uid}
+    </update>
+    <!--批量插入收礼单-->
+    <insert id="saveGift" parameterType="java.util.List" useGeneratedKeys="true">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT
+            LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO gift_list(gift_uid,gift_person,gift_money,gift_remark,event_uid,user_uid,gift_status)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.giftUid},#{item.giftPerson},#{item.giftMoney},#{item.giftRemark},#{item.eventUid},#{item.userUid},0)
+        </foreach>
+    </insert>
+    <!--批量插入还礼单-->
+    <insert id="saveRepay" parameterType="java.util.List" useGeneratedKeys="true">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT
+            LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO repay_list(repay_uid,repay_person,repay_money,repay_remark,gift_uid,event_uid,user_uid,repay_status)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.repayUid},#{item.repayPerson},#{item.repayMoney},#{item.repayRemark},#{item.giftUid},#{item.eventUid},#{item.userUid},0)
+        </foreach>
+    </insert>
+    <!--删除事件-->
+    <delete id="deleteEvent" parameterType="string">
+      DELETE FROM event where user_uid=#{uid}
+    </delete>
+    <!--删除收礼单-->
+    <delete id="deleteGift" parameterType="string">
+        DELETE FROM gift_list WHERE user_uid=#{uid}
+    </delete>
+    <!--删除还礼单-->
+    <delete id="deleteRepay" parameterType="string">
+        DELETE FROM repay_list WHERE user_uid=#{uid}
+    </delete>
+    
+    <select id="findEventList" parameterType="string" resultMap="eventMap">
+        SELECT * FROM event where user_uid=#{uid}
+    </select>
+    <select id="findGiftList" parameterType="string" resultMap="giftMap">
+        SELECT * FROM gift_list where user_uid=#{uid}
+    </select>
+    <select id="findRepayList" parameterType="string" resultMap="repayMap">
+        SELECT * FROM repay_list WHERE user_uid=#{uid}
+    </select>
+    
+    <insert id="saveFeedBack" parameterType="com.ganli.entity.FeedBack">
+        INSERT INTO feedback VALUES (#{feedBckUid},#{feedBackDesc},#{userUid})
+    </insert>
 
+    <insert id="saveMerchant" parameterType="com.ganli.entity.Merchant" useGeneratedKeys="true">
+        INSERT INTO merchant_list(merchant_uid,merchant_img,merchant_desc,merchant_phone,merchant_location,merchant_score)
+        VALUES
+        (#{merchantUid},#{merchantImg},#{merchantDesc},#{merchantPhone},#{merchantLocation},#{merchantScore})
+        ON DUPLICATE KEY UPDATE
+        merchant_img=#{merchantImg},
+        merchant_desc=#{merchantDesc},
+        merchant_phone=#{merchantPhone},
+        merchant_location=#{merchantLocation},
+        merchant_score=#{merchantScore}
+    </insert>
+    <select id="findMerchantList" resultMap="merchantMap" >
+        SELECT * FROM merchant_list
+        <where>
+            <if test="merchantLocation != '' and merchantLocation != null">
+               and merchant_location=#{merchantLocation}
+            </if>
+            <if test="merchantType != '' and merchantType != null">
+                and merchant_type=#{merchantType}
+            </if>
+            <if test="merchantName != '' and merchantName != null">
+                and merchant_name like CONCAT(CONCAT(#{merchantName}), '%')
+            </if>
+        </where>
+
+    </select>
     <!--&lt;!&ndash;查询项目2用户&ndash;&gt;-->
     <!--<select id="findProUser" parameterType="int" resultType="com.karakal.usercenter.entity.ProjectUser">-->
         <!--SELECT * FROM uc_project_user WHERE pid=#{pId}-->

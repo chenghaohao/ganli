@@ -13,6 +13,8 @@ public class GiftList implements Serializable {
     private String giftMoney;           //收礼单金额
     private String giftRemark;          //收礼单备注
     private String eventUid;            //收单对应的uuid
+    private Integer giftStatus;          //收礼单状态
+    private String userUid;             //用户id
 
     public String getGiftUid() {
         return giftUid;
@@ -52,6 +54,22 @@ public class GiftList implements Serializable {
 
     public void setEventUid(String eventUid) {
         this.eventUid = eventUid;
+    }
+
+    public Integer getGiftStatus() {
+        return giftStatus;
+    }
+
+    public void setGiftStatus(Integer giftStatus) {
+        this.giftStatus = giftStatus;
+    }
+
+    public String getUserUid() {
+        return userUid;
+    }
+
+    public void setUserUid(String userUid) {
+        this.userUid = userUid;
     }
 
     @Override

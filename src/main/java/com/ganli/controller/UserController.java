@@ -2,6 +2,7 @@ package com.ganli.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.ganli.common.entity.ResponseMessage;
 import com.ganli.common.util.SendMsgUtil;
 import com.ganli.entity.User;
 import com.ganli.service.UserService;
@@ -47,6 +48,7 @@ public class UserController extends BaseController{
      */
     @RequestMapping("checkPhoneCode")
     public Object checkPhoneCode(String callback,HttpServletRequest request,String code){
+        rm = new ResponseMessage();
         String phoneCode = (String)request.getSession().getAttribute("phoneCode");
         if(!phoneCode.equals(code)){
             rm.setMsg("验证码错误");
@@ -63,6 +65,7 @@ public class UserController extends BaseController{
      */
     @RequestMapping("saveUser")
     public Object saveUser(String callback,String data){
+        rm = new ResponseMessage();
         try{
             User user = JSONObject.parseObject(data,User.class);
             if(user.getUserUid() == null){
@@ -85,6 +88,7 @@ public class UserController extends BaseController{
      */
     @RequestMapping("checkUser")
     public Object checkUser(String callback,String data){
+        rm = new ResponseMessage();
         JSONObject obj = JSONObject.parseObject(data);
         String phone = obj.getString("phone");
         User user = null;
