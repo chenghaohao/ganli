@@ -11,7 +11,9 @@ import com.ganli.entity.User;
 import com.ganli.service.EventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -122,5 +124,82 @@ public class ServiceController extends BaseController{
         List merchants = eventService.findMerchantList(start, limit, merchant);
         rm.setDatas(merchants);
         return jsonpHandler(rm,callback);
+    }
+
+    /**
+     * 记录操作次数
+     * @param tp
+     * @param type
+     * @param phoneId
+     * @param callback
+     * @return
+     */
+    @RequestMapping("record/{tp}")
+    public Object recordService(@PathVariable("tp") Integer tp,
+                                @RequestParam(defaultValue = "", required = false) String type, String phoneId,String callback) {
+        rm = new ResponseMessage();
+        try {
+            switch (tp) {
+                case 1:
+                    eventService.insertRecordInstall(phoneId);
+                    break;
+                case 2:
+                    eventService.insertRecordEvent(phoneId, type);
+                    break;
+                case 3:
+                    eventService.insertRecordMerchant(phoneId);
+                    break;
+            }
+            return jsonpHandler(rm,callback);
+        }catch (Exception e){
+            rm.setCode("000001");
+            rm.setMsg("系统错误");
+            log.info(e.getMessage());
+            return jsonpHandler(rm,callback);
+        }
+    }
+
+    /**
+     * 查询操作记录
+     * @param tp
+     * @param startTime
+     * @param endTime
+     * @param type
+     * @param callback
+     * @return
+     */
+    @RequestMapping("count/{tp}")
+    public Object countRecord(@PathVariable("tp")Integer tp,
+                              @RequestParam(defaultValue = "",required = false)String startTime,
+                              @RequestParam(defaultValue = "",required = false)String endTime,
+                              @RequestParam(defaultValue = "",required = false)String type,
+                              String callback){
+        rm = new ResponseMessage();
+        try{
+            Integer count = null;
+            switch (tp){
+                case 1:count = eventService.countRecordInstall(startTime,endTime); break;
+                case 2:count = eventService.countRecordEvent(startTime,endTime,type); break;
+                case 3:count = eventService.countRecordMerchant(startTime,endTime); break;
+            }
+            rm.setData(count);
+            return jsonpHandler(rm,callback);
+        }catch (Exception e){
+            rm.setCode("000001");
+            rm.setMsg("系统异常");
+            return jsonpHandler(rm,callback);
+        }
+    }
+
+    public String toUppercaseFirst(String str){
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < str.length(); i ++){
+            if(i == 0){
+                sb.append(String.valueOf(str.charAt(i)).toUpperCase());
+            }else{
+                sb.append(str.charAt(i));
+            }
+        }
+        return sb.toString();
     }
 }

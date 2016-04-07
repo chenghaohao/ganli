@@ -8,6 +8,8 @@ import com.ganli.entity.User;
 import com.ganli.service.UserService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("user")
 public class UserController extends BaseController{
+    Logger log = LoggerFactory.getLogger(UserController.class);
     @Resource
     UserService userService;
     /**
@@ -33,8 +36,9 @@ public class UserController extends BaseController{
     @RequestMapping("sendPhoneCode")
     public Object sendPhoneCode(String phone,String callback,HttpServletRequest request){
         String msg = SendMsgUtil.randomNum();
-        msg = "礼金理账号注册手机验证码:" + msg;
         request.getSession().setAttribute("phoneCode",msg);
+        msg = "礼金理账号注册手机验证码:" + msg;
+        System.out.println(msg);
         SendMsgUtil.sendMsg(phone,msg);
         return jsonpHandler(rm,callback);
     }
@@ -68,12 +72,23 @@ public class UserController extends BaseController{
         rm = new ResponseMessage();
         try{
             User user = JSONObject.parseObject(data,User.class);
+            if(user.getUserPhone() != null){
+                User u = userService.findUserByPhone(user.getUserPhone());
+                if(u != null){
+                    rm.setCode("000002");
+                    rm.setMsg("用户已存在");
+                    rm.setData(u);
+                    return jsonpHandler(rm,callback);
+                }
+            }
             if(user.getUserUid() == null){
                 user.setUserUid(UUID.randomUUID().toString());
             }
             userService.saveUser(user);
+            rm.setData(user);
             return jsonpHandler(rm,callback);
         }catch (Exception e){
+            log.info(e.getMessage());
             rm.setMsg("系统错误");
             rm.setCode("100001");
             return  jsonpHandler(rm,callback);

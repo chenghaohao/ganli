@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -56,6 +58,44 @@ public class EventService {
         return eventDao.saveMerchant(merchant);
     }
     public List<Merchant> findMerchantList(int start,int limit,Merchant merchant){
-        return eventDao.findMerchantList(start,limit,merchant);
+        return eventDao.findMerchantList(start, limit, merchant);
+    }
+    @Transactional
+    public Integer insertRecordInstall(String phoneId){
+        if(eventDao.countRecordInstall(getToday(),getToday(),phoneId) != 0){
+            return null;
+        }
+        return eventDao.insertRecordInstall(phoneId);
+    }
+    @Transactional
+    public Integer insertRecordEvent(String phoneId,String type){
+        return eventDao.insertRecordEvent(phoneId, type);
+    }
+    @Transactional
+    public Integer insertRecordMerchant(String phoneId){
+        if(eventDao.countRecordMerchant(getToday(),getToday(),phoneId) != 0){
+            return null;
+        }
+        return eventDao.insertRecordMerchant(phoneId);
+    }
+    public Integer  countRecordInstall(String startTime,String endTime){
+        return eventDao.countRecordInstall(startTime, endTime, null);
+    }
+    public Integer countRecordEvent(String startTime,String endTime,String type){
+        return eventDao.countRecordEvent(startTime, endTime, type);
+    }
+    public Integer countRecordMerchant(String startTime,String endTime){
+        return eventDao.countRecordMerchant(startTime,endTime,null);
+    }
+
+    /**
+     * 获取今天的日期
+     * @return
+     */
+    private String getToday(){
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(date);
+        return today;
     }
 }

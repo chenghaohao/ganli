@@ -162,6 +162,36 @@ public class TestCase {
         List<Merchant> list = eventDao.findMerchantList(0,3,merchant);
         System.out.print(list.size());
     }
+    @org.junit.Test
+    public void insertInstall(){
+        String phoneId = "123";
+        eventDao.insertRecordInstall(phoneId);
+    }
+    @org.junit.Test
+    public void insertEvent(){
+        String phoneId= "123";
+        int type = 1;
+        eventDao.insertRecordEvent(phoneId, type);
+    }
+    @org.junit.Test
+    public void insertMerchant(){
+        String phoneId = "123";
+        eventDao.insertRecordMerchant(phoneId);
+    }
+    @org.junit.Test
+    public void countInstall(){
+        String startTime = "2016-03-24";
+        String endTime = "2016-03-25";
+        int num = eventDao.countRecordInstall(startTime,endTime,"234");
+        System.out.println("num:" + num);
+    }
+    @org.junit.Test
+    public void countRecordEvent(){
+        String startTime = "2016-03-24";
+        String endTime = "2016-03-25";
+        int num = eventDao.countRecordEvent(startTime,endTime,null);
+        System.out.println("num:"+num);
+    }
 
 
 
