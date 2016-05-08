@@ -15,6 +15,7 @@
         <result column="event_type" property="eventType" jdbcType="INTEGER"/>
         <result column="event_location" property="eventLocation" jdbcType="VARCHAR"/>
         <result column="event_time" property="eventTime" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
         <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
     </resultMap>
     <resultMap id="giftMap" type="com.ganli.entity.GiftList">
@@ -23,7 +24,7 @@
         <result column="gift_money" property="giftMoney" jdbcType="INTEGER"/>
         <result column="gift_remark" property="giftRemark" jdbcType="VARCHAR"/>
         <result column="event_uid" property="eventUid" jdbcType="VARCHAR"/>
-        <result column="gift_status" property="giftStatus" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
         <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
     </resultMap>
     <resultMap id="repayMap" type="com.ganli.entity.RepayList">
@@ -34,7 +35,7 @@
         <result column="gift_uid" property="giftUid" jdbcType="VARCHAR"/>
         <result column="event_uid" property="eventUid" jdbcType="VARCHAR"/>
         <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
-        <result column="repay_status" property="repayStatus" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
     </resultMap>
     <resultMap id="merchantMap" type="com.ganli.entity.Merchant">
         <id column="merchant_uid" property="merchantUid" jdbcType="VARCHAR"/>
@@ -46,13 +47,23 @@
         <result column="merchant_score" property="merchantScore" jdbcType="VARCHAR"/>
         <result column="merchant_type" property="merchantType" jdbcType="VARCHAR"/>
     </resultMap>
+    <resultMap id="imgMap" type="Map">
+        <id property="imgId" column="img_id" />
+        <result property="md5" column="md5" />
+    </resultMap>
+    <resultMap id="feedBackMap" type="com.ganli.entity.FeedBack">
+        <id column="feedback_uid" property="feedBckUid" jdbcType="VARCHAR"/>
+        <result column="feedback_desc" property="feedBackDesc" jdbcType="VARCHAR"/>
+        <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
+        <result column="c_time" property="cTime" jdbcType="DATE"/>
+    </resultMap>
      <!--批量插入事件-->
     <insert id="saveEvent" parameterType="java.util.List" useGeneratedKeys="true">
         <selectKey resultType="int" keyProperty="id" order="AFTER">
             SELECT
             LAST_INSERT_ID()
         </selectKey>
-        INSERT INTO event(event_uid,event_name,event_type,event_location,event_time,user_uid,event_status)
+        INSERT INTO event(event_uid,event_name,event_type,event_location,event_time,user_uid,status)
         VALUES
         <foreach collection="list" item="item" index="index" separator="," >
             (#{item.eventUid},#{item.eventName},#{item.eventType},#{item.eventLocation},#{item.eventTime},#{item.userUid},0)
@@ -67,7 +78,7 @@
             SELECT
             LAST_INSERT_ID()
         </selectKey>
-        INSERT INTO gift_list(gift_uid,gift_person,gift_money,gift_remark,event_uid,user_uid,gift_status)
+        INSERT INTO gift_list(gift_uid,gift_person,gift_money,gift_remark,event_uid,user_uid,status)
         VALUES
         <foreach collection="list" item="item" index="index" separator="," >
             (#{item.giftUid},#{item.giftPerson},#{item.giftMoney},#{item.giftRemark},#{item.eventUid},#{item.userUid},0)
@@ -79,7 +90,7 @@
             SELECT
             LAST_INSERT_ID()
         </selectKey>
-        INSERT INTO repay_list(repay_uid,repay_person,repay_money,repay_remark,gift_uid,event_uid,user_uid,repay_status)
+        INSERT INTO repay_list(repay_uid,repay_person,repay_money,repay_remark,gift_uid,event_uid,user_uid,status)
         VALUES
         <foreach collection="list" item="item" index="index" separator="," >
             (#{item.repayUid},#{item.repayPerson},#{item.repayMoney},#{item.repayRemark},#{item.giftUid},#{item.eventUid},#{item.userUid},0)
@@ -109,34 +120,52 @@
     </select>
     
     <insert id="saveFeedBack" parameterType="com.ganli.entity.FeedBack">
-        INSERT INTO feedback VALUES (#{feedBckUid},#{feedBackDesc},#{userUid})
+        INSERT INTO feedback VALUES (#{feedBckUid},#{feedBackDesc},#{userUid},now())
     </insert>
 
     <insert id="saveMerchant" parameterType="com.ganli.entity.Merchant" useGeneratedKeys="true">
-        INSERT INTO merchant_list(merchant_uid,merchant_img,merchant_desc,merchant_phone,merchant_location,merchant_score)
+        INSERT INTO merchant_list(merchant_uid,merchant_name,merchant_img,merchant_desc,merchant_phone,merchant_location,merchant_score,merchant_type)
         VALUES
-        (#{merchantUid},#{merchantImg},#{merchantDesc},#{merchantPhone},#{merchantLocation},#{merchantScore})
+        (#{merchantUid},#{merchantName},#{merchantImg},#{merchantDesc},#{merchantPhone},#{merchantLocation},#{merchantScore},#{merchantType})
         ON DUPLICATE KEY UPDATE
+        merchant_name=#{merchantName},
         merchant_img=#{merchantImg},
         merchant_desc=#{merchantDesc},
         merchant_phone=#{merchantPhone},
         merchant_location=#{merchantLocation},
-        merchant_score=#{merchantScore}
+        merchant_score=#{merchantScore},
+        merchant_type=#{merchantType}
     </insert>
     <select id="findMerchantList" resultMap="merchantMap" >
-        SELECT * FROM merchant_list
+        SELECT m.* FROM merchant_list m
         <where>
+            <if test="merchantUid != '' and merchantUid != null">
+                and m.merchant_uid=#{merchantUid}
+            </if>
             <if test="merchantLocation != '' and merchantLocation != null">
-               and merchant_location=#{merchantLocation}
+               and m.merchant_location=#{merchantLocation}
             </if>
             <if test="merchantType != '' and merchantType != null">
-                and merchant_type=#{merchantType}
+                and m.merchant_type=#{merchantType}
             </if>
             <if test="merchantName != '' and merchantName != null">
-                and merchant_name like CONCAT(CONCAT(#{merchantName}), '%')
+                and m.merchant_name like CONCAT(CONCAT(#{merchantName}), '%')
             </if>
         </where>
 
+    </select>
+    <select id="findImgs" resultType="Map" parameterType="List">
+        SELECT * FROM imgs WHERE merchant_uid IN
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="findFeedBckList" resultType="map" >
+        SELECT f.*,u.user_name,u.user_phone FROM feedback f,user u WHERE f.user_uid=u.user_uid order BY f.c_time DESC
+    </select>
+
+    <select id="findUserList" resultType="map" >
+        SELECT u.* FROM user u
     </select>
     
     <insert id="insertRecordInstall" parameterType="string">
@@ -181,4 +210,113 @@
             </if>
         </where>
     </select>
+
+    <update id="batchUpdateEvent"  parameterType="java.util.List">
+
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update event
+            <set>
+                event_name=#{item.eventName},
+                event_type=#{item.eventType},
+                event_location=#{item.eventLocation},
+                event_time=#{item.eventTime},
+                status=0
+            </set>
+            where event_uid = #{item.eventUid}
+        </foreach>
+
+    </update>
+    <update id="batchUpdateGift"  parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update gift_list
+            <set>
+                gift_person=#{item.giftPerson},
+                gift_money=#{item.giftMoney},
+                gift_remark=#{item.giftRemark},
+                event_uid=#{item.eventUid},
+                user_uid=#{item.userUid},
+                status=0
+            </set>
+            where gift_uid = #{item.giftUid}
+        </foreach>
+    </update>
+    <update id="batchUpdateRepay"  parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update repay_list
+            <set>
+                repay_person=#{item.repayPerson},
+                repay_money=#{item.repayMoney},
+                repay_remark=#{item.repayRemark},
+                gift_uid=#{item.giftUid},
+                event_uid=#{item.eventUid},
+                user_uid=#{item.userUid},
+                status=0
+            </set>
+            where repay_uid = #{item.repayUid}
+        </foreach>
+    </update>
+
+    <delete id="batchDeleteEvent" parameterType="java.util.List">
+        <![CDATA[
+       delete from event where event_uid in
+    ]]>
+        <foreach collection="list" item = "item" open="(" separator="," close=")">
+            #{item.eventUid}
+        </foreach>
+    </delete>
+    <delete id="batchDeleteGift" parameterType="java.util.List">
+        <![CDATA[
+       delete from gift_list where gift_uid in
+    ]]>
+        <foreach collection="list" item = "item" open="(" separator="," close=")">
+            #{item.giftUid}
+        </foreach>
+    </delete>
+    <delete id="batchDeleteRepay" parameterType="java.util.List">
+        <![CDATA[
+       delete from repay_list where repay_uid in
+    ]]>
+        <foreach collection="list" item = "item" open="(" separator="," close=")">
+            #{item.repayUid}
+        </foreach>
+    </delete>
+    <select id="countMerchant" resultType="int">
+        SELECT count(merchant_uid) FROM merchant_list
+    </select>
+    <select id="countFeedback" resultType="int">
+        SELECT count(feedback_uid) FROM feedback
+    </select>
+    <delete id="deleteUser">
+        DELETE FROM user WHERE user_uid=#{id}
+    </delete>
+    <delete id="deleteMerchant">
+        DELETE FROM merchant_list WHERE merchant_uid=#{id}
+    </delete>
+    <delete id="deleteFeedBck">
+        DELETE FROM feedback WHERE feedback_uid=#{id}
+    </delete>
+
+    <insert id="insertImgs" parameterType="java.util.List" useGeneratedKeys="true">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT
+            LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO imgs(md5,merchant_uid)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.md5},#{item.merchant_uid})
+        </foreach>
+    </insert>
+    
+    <select id="findEventYear" resultType="int">
+        SELECT COUNT(id) FROM record_event WHERE record_time LIKE  CONCAT(CONCAT(#{date}), '%')
+    </select>
+    <select id="findInstallYear" resultType="int">
+        SELECT COUNT(id) FROM record_install WHERE record_time LIKE  CONCAT(CONCAT(#{date}), '%')
+    </select>
+    <select id="findMerchantYear" resultType="int">
+        SELECT COUNT(id) FROM record_merchant WHERE record_time LIKE  CONCAT(CONCAT(#{date}), '%')
+    </select>
+
+
 </mapper>

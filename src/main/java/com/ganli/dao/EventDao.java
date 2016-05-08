@@ -57,6 +57,18 @@ public class EventDao extends BaseDao{
     public List<Merchant> findMerchantList(int start,int limit,Merchant merchant){
         return this.getSqlSession().selectList(NAMESPACE + ".findMerchantList", merchant, new RowBounds(start, limit));
     }
+    public List<Map<String,Object>> findFeedBckList(int start,int limit,FeedBack feedBack){
+        return this.getSqlSession().selectList(NAMESPACE + ".findFeedBckList", feedBack, new RowBounds(start, limit));
+    }
+    public List<Map<String,Object>> findUserList(int start,int limit,User user){
+        return this.getSqlSession().selectList(NAMESPACE + ".findUserList",user, new RowBounds(start, limit));
+    }
+    public Integer countMerchant(){
+        return this.getSqlSession().selectOne(NAMESPACE + ".countMerchant");
+    }
+    public Integer countFeedback(){
+        return this.getSqlSession().selectOne(NAMESPACE + ".countFeedback");
+    }
     public Integer insertRecordInstall(String phoneId){     //插入装机统计
         return this.getSqlSession().insert(NAMESPACE + ".insertRecordInstall", phoneId);
     }
@@ -89,5 +101,47 @@ public class EventDao extends BaseDao{
         map.put("endTime",endTime);
         map.put("phoneId",phoneId);
         return this.getSqlSession().selectOne(NAMESPACE + ".countRecordMerchant", map);
+    }
+    public Integer batchUpdateEvent(List<Event> list){  //批量更新
+        return this.getSqlSession().insert(NAMESPACE + ".batchUpdateEvent", list);
+    }
+    public Integer batchUpdateGift(List<GiftList> list){
+        return this.getSqlSession().insert(NAMESPACE + ".batchUpdateGift",list);
+    }
+    public Integer batchUpdateRepay(List<RepayList> list){
+        return this.getSqlSession().insert(NAMESPACE + ".batchUpdateRepay",list);
+    }
+    public Integer batchDeleteEvent(List<Event> list){
+        return this.getSqlSession().delete(NAMESPACE + ".batchDeleteEvent", list);
+    }
+    public Integer batchDeleteGift(List<GiftList> list){
+        return this.getSqlSession().delete(NAMESPACE + ".batchDeleteGift",list);
+    }
+    public Integer batchDeleteRepay(List<RepayList> list){
+        return this.getSqlSession().delete(NAMESPACE + ".batchDeleteRepay",list);
+    }
+    public Integer deleteUser(String id){
+        return this.getSqlSession().delete(NAMESPACE + ".deleteUser",id);
+    }
+    public Integer deleteMerchant(String id){
+        return this.getSqlSession().delete(NAMESPACE + ".deleteMerchant",id);
+    }
+    public Integer deleteFeedBck(String id){
+        return this.getSqlSession().delete(NAMESPACE + ".deleteFeedBck",id);
+    }
+    public List<Map<String,Object>> findImgs(List<String> list){
+        return this.getSqlSession().selectList(NAMESPACE + ".findImgs", list);
+    }
+    public Integer insertImgs(List<Map<String,Object>> list){
+        return this.getSqlSession().insert(NAMESPACE + ".insertImgs", list);
+    }
+    public Integer findInstallYear(String date){
+        return this.getSqlSession().selectOne(NAMESPACE + ".findInstallYear", date);
+    }
+    public Integer findEventYear(String date){
+        return this.getSqlSession().selectOne(NAMESPACE+".findEventYear",date);
+    }
+    public Integer findMerchantYear(String date){
+        return this.getSqlSession().selectOne(NAMESPACE+".findMerchantYear",date);
     }
 }

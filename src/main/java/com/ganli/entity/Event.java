@@ -14,6 +14,7 @@ public class Event implements Serializable{
     private String eventLocation;           //事件地址
     private String eventTime;               //事件发生时间
     private String userUid;                 //用户uuid
+    private Integer status;                 //事件状态
 
     public String getEventUid() {
         return eventUid;
@@ -61,6 +62,14 @@ public class Event implements Serializable{
 
     public void setUserUid(String userUid) {
         this.userUid = userUid;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     @Override

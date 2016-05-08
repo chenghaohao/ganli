@@ -1,6 +1,8 @@
 package com.ganli.entity;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hao.cheng on 2016/3/18.
@@ -14,6 +16,7 @@ public class Merchant implements Serializable{
     private String merchantLocation;        //商家地址
     private String merchantScore;           //商家评分
     private String merchantType;            //类型
+    private List<Map<String,Object>> imgs;      //图片数组
 
     public String getMerchantUid() {
         return merchantUid;
@@ -21,6 +24,14 @@ public class Merchant implements Serializable{
 
     public void setMerchantUid(String merchantUid) {
         this.merchantUid = merchantUid;
+    }
+
+    public String getMerchantName() {
+        return merchantName;
+    }
+
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
     }
 
     public String getMerchantImg() {
@@ -71,23 +82,26 @@ public class Merchant implements Serializable{
         this.merchantType = merchantType;
     }
 
-    public String getMerchantName() {
-        return merchantName;
+    public List<Map<String, Object>> getImgs() {
+        return imgs;
     }
 
-    public void setMerchantName(String merchantName) {
-        this.merchantName = merchantName;
+    public void setImgs(List<Map<String, Object>> imgs) {
+        this.imgs = imgs;
     }
 
     @Override
     public String toString() {
         return "Merchant{" +
                 "merchantUid='" + merchantUid + '\'' +
+                ", merchantName='" + merchantName + '\'' +
                 ", merchantImg='" + merchantImg + '\'' +
                 ", merchantDesc='" + merchantDesc + '\'' +
                 ", merchantPhone='" + merchantPhone + '\'' +
                 ", merchantLocation='" + merchantLocation + '\'' +
                 ", merchantScore='" + merchantScore + '\'' +
+                ", merchantType='" + merchantType + '\'' +
+                ", imgs=" + imgs +
                 '}';
     }
 }

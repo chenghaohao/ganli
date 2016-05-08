@@ -15,6 +15,7 @@ public class GiftList implements Serializable {
     private String eventUid;            //收单对应的uuid
     private Integer giftStatus;          //收礼单状态
     private String userUid;             //用户id
+    private Integer status;              //收礼单状态,0不变，1新增，2更改，3删除
 
     public String getGiftUid() {
         return giftUid;
@@ -70,6 +71,14 @@ public class GiftList implements Serializable {
 
     public void setUserUid(String userUid) {
         this.userUid = userUid;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     @Override

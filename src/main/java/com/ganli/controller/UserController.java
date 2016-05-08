@@ -35,6 +35,12 @@ public class UserController extends BaseController{
      */
     @RequestMapping("sendPhoneCode")
     public Object sendPhoneCode(String phone,String callback,HttpServletRequest request){
+        rm = new ResponseMessage();
+        if(phone == null && phone == ""){
+            rm.setMsg("手机号不能为空");
+            rm.setCode("000001");
+            return jsonpHandler(rm,callback);
+        }
         String msg = SendMsgUtil.randomNum();
         request.getSession().setAttribute("phoneCode",msg);
         msg = "礼金理账号注册手机验证码:" + msg;
@@ -72,16 +78,16 @@ public class UserController extends BaseController{
         rm = new ResponseMessage();
         try{
             User user = JSONObject.parseObject(data,User.class);
-            if(user.getUserPhone() != null){
-                User u = userService.findUserByPhone(user.getUserPhone());
-                if(u != null){
-                    rm.setCode("000002");
-                    rm.setMsg("用户已存在");
-                    rm.setData(u);
-                    return jsonpHandler(rm,callback);
-                }
-            }
             if(user.getUserUid() == null){
+                if(user.getUserPhone() != null){
+                    User u = userService.findUserByPhone(user.getUserPhone());
+                    if(u != null){
+                        rm.setCode("000002");
+                        rm.setMsg("用户已存在");
+                        rm.setData(u);
+                        return jsonpHandler(rm,callback);
+                    }
+                }
                 user.setUserUid(UUID.randomUUID().toString());
             }
             userService.saveUser(user);
@@ -120,7 +126,7 @@ public class UserController extends BaseController{
         }
         String pwd = obj.getString("pwd");
         if(!StringUtils.isBlank(pwd)){
-            user = userService.findUserByPwd(pwd);
+            user = userService.findUserByPwd(pwd,phone);
             if(user != null){
                 rm.setData(user);
                 return jsonpHandler(rm,callback);
@@ -131,5 +137,29 @@ public class UserController extends BaseController{
             }
         }
         return null;
+    }
+    @RequestMapping("userLogin")
+    public Object userLogin(String callback,String data){
+        rm = new ResponseMessage();
+        JSONObject obj = JSONObject.parseObject(data);
+        String phone = obj.getString("phone");
+        String pwd = obj.getString("pwd");
+        User user = null;
+        if(StringUtils.isBlank(phone) || StringUtils.isBlank(pwd)){
+            rm.setMsg("手机号或密码不能为空");
+            rm.setCode("000001");
+            return jsonpHandler(rm,callback);
+        }else{
+            user = userService.findUserByPwd(pwd,phone);
+            if(user != null){
+                rm.setData(user);
+//                return jsonpHandler(rm,callback);
+            }else{
+                rm.setMsg("用户不存在");
+                rm.setCode("000001");
+                return jsonpHandler(rm,callback);
+            }
+        }
+        return jsonpHandler(rm,callback);
     }
 }

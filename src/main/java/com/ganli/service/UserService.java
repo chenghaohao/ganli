@@ -27,7 +27,7 @@ public class UserService {
     public User findUserByPhone(String phone){     //通过手机号查询用户
         return userDao.findUserByPhone(phone);
     }
-    public User findUserByPwd(String pwd){      //通过密码查询用户
-        return userDao.findUserByPwd(pwd);
+    public User findUserByPwd(String pwd,String phone){      //通过密码查询用户
+        return userDao.findUserByPwd(pwd,phone);
     }
 }

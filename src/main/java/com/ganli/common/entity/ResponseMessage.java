@@ -15,6 +15,7 @@ import java.util.List;
 public class ResponseMessage implements Serializable {
     private String msg = "操作成功";        //返回信息
     private String code = "000000";        //返回编码
+    private Integer total = null;           //返回总数
     private List<Object> datas = null;
     private List<Event> event = null;
     private List<GiftList> gift = null;
@@ -75,6 +76,14 @@ public class ResponseMessage implements Serializable {
 
     public void setRepay(List<RepayList> repay) {
         this.repay = repay;
+    }
+
+    public Integer getTotal() {
+        return total;
+    }
+
+    public void setTotal(Integer total) {
+        this.total = total;
     }
 
     @Override

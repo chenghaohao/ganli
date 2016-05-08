@@ -14,10 +14,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by hao.cheng on 2016/2/22.
@@ -79,8 +77,8 @@ public class TestCase {
     @org.junit.Test
     public void findUserByPwd(){
         String pwd = "234";
-        User user = userDao.findUserByPwd(pwd);
-        System.out.print(user.toString());
+//        User user = userDao.findUserByPwd(pwd);
+//        System.out.print(user.toString());
     }
     @org.junit.Test
     public void saveEvent(){
@@ -171,7 +169,7 @@ public class TestCase {
     public void insertEvent(){
         String phoneId= "123";
         int type = 1;
-        eventDao.insertRecordEvent(phoneId, type);
+//        eventDao.insertRecordEvent(phoneId, type);
     }
     @org.junit.Test
     public void insertMerchant(){
@@ -189,10 +187,42 @@ public class TestCase {
     public void countRecordEvent(){
         String startTime = "2016-03-24";
         String endTime = "2016-03-25";
-        int num = eventDao.countRecordEvent(startTime,endTime,null);
+        int num = eventDao.countRecordEvent(startTime, endTime, null);
         System.out.println("num:"+num);
     }
+    @org.junit.Test
+    public void countMerchant(){
+        int count = eventDao.countMerchant();
+        System.out.print(count);
+    }
+    @org.junit.Test
+    public void findFeedBck(){
+//        List<FeedBack> list = eventDao.findFeedBckList(1, 30, null);
+//        System.out.print(list.size());
+        List<String> list = new ArrayList<String>();
+//        list.add("1");
+        List<Map<String,Object>> imgs = eventDao.findImgs(list);
+        System.out.print(imgs);
+    }
+    @org.junit.Test
+    public void countEvent(){
+        Date date = new Date();
+        Calendar c = Calendar.getInstance();
+        System.out.println("Y"+ c.get(Calendar.YEAR));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        String param = sdf.format(date);
 
-
+        List<Integer> list = new ArrayList<Integer>();
+        for(int i = 1;i < 13;i++){
+            if(i < 10){
+                list.add(eventDao.findEventYear(c.get(Calendar.YEAR)+"-0"+i));
+            }else{
+                list.add(eventDao.findEventYear(c.get(Calendar.YEAR) + i + ""));
+            }
+        }
+        System.out.println(list.size());
+//        Integer count = eventDao.findEventYear(param);
+//        System.out.print(count);
+    }
 
 }

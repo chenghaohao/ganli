@@ -1,5 +1,6 @@
 package com.ganli.controller;
 
+import com.ganli.common.entity.ResponseMessage;
 import com.ganli.common.util.Constants;
 import com.ganli.common.util.SendMsgUtil;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,13 @@ import java.util.Map;
 @RestController
 @RequestMapping()
 public class TestController extends BaseController{
+    @RequestMapping("exception")
+    public Object exception(String callback){
+        rm = new ResponseMessage();
+        rm.setCode("000001");
+        rm.setMsg("请求接口异常");
+        return jsonpHandler(rm,callback);
+    }
     @RequestMapping("test")
     public Object test(String callback){
         Map<String,Object> map = new HashMap<String, Object>();

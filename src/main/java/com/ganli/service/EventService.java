@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hao.cheng on 2016/3/15.
@@ -40,6 +42,54 @@ public class EventService {
             log.info(e.getMessage());
         }
     }
+    @Transactional
+    public void saveDataOnly(List<Event> events,List<GiftList> gifts,List<RepayList> repayLists){
+        try{
+            if(events.size() > 0){
+                eventDao.saveEvent(events);       //批量插入新事件
+            }
+            if(gifts.size() > 0){
+                eventDao.saveGift(gifts);
+            }
+            if (repayLists.size() > 0){
+                eventDao.saveRepay(repayLists);
+            }
+        }catch (Exception e){
+            log.info(e.getMessage());
+        }
+    }
+    @Transactional
+    public void updateDataOnly(List<Event> events,List<GiftList> gifts,List<RepayList> repayLists){
+        try{
+            if(events.size() > 0){
+                eventDao.batchUpdateEvent(events);       //批量插入新事件
+            }
+            if(gifts.size() > 0){
+                eventDao.batchUpdateGift(gifts);
+            }
+            if (repayLists.size() > 0){
+                eventDao.batchUpdateRepay(repayLists);
+            }
+        }catch (Exception e){
+            log.info(e.getMessage());
+        }
+    }
+    @Transactional
+    public void deleteDataOnly(List<Event> events,List<GiftList> gifts,List<RepayList> repayLists){
+        try{
+            if(events.size() > 0){
+                eventDao.batchDeleteEvent(events);       //批量插入新事件
+            }
+            if(gifts.size() > 0){
+                eventDao.batchDeleteGift(gifts);
+            }
+            if (repayLists.size() > 0){
+                eventDao.batchDeleteRepay(repayLists);
+            }
+        }catch (Exception e){
+            log.info(e.getMessage());
+        }
+    }
     public List<Event> findEvents(String uid){
         return eventDao.findEventList(uid);
     }
@@ -54,7 +104,11 @@ public class EventService {
         return eventDao.saveFeedBack(feedBack);
     }
     @Transactional
-    public Integer saveMerchant(Merchant merchant){
+    public Integer saveMerchant(Merchant merchant,List<Map<String,Object>> list){
+        eventDao.saveMerchant(merchant);
+        if(list.size() < 1){
+            eventDao.insertImgs(list);
+        }
         return eventDao.saveMerchant(merchant);
     }
     public List<Merchant> findMerchantList(int start,int limit,Merchant merchant){
@@ -85,9 +139,11 @@ public class EventService {
         return eventDao.countRecordEvent(startTime, endTime, type);
     }
     public Integer countRecordMerchant(String startTime,String endTime){
-        return eventDao.countRecordMerchant(startTime,endTime,null);
+        return eventDao.countRecordMerchant(startTime, endTime, null);
     }
-
+    public Integer countMerchant(){
+        return eventDao.countMerchant();
+    }
     /**
      * 获取今天的日期
      * @return
@@ -97,5 +153,23 @@ public class EventService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(date);
         return today;
+    }
+    @Transactional
+    public Integer deleteUser(String id){
+        return eventDao.deleteUser(id);
+    }
+    @Transactional
+    public Integer deleteMerchant(String id){
+        return eventDao.deleteMerchant(id);
+    }
+    @Transactional
+    public Integer deleteFeedBck(String id){
+        return eventDao.deleteFeedBck(id);
+    }
+    public Integer findEventYear(){
+        Calendar c = Calendar.getInstance();
+        Date date = new Date();
+        date.getYear();
+        return null;
     }
 }

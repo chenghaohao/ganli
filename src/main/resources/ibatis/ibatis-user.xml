@@ -47,8 +47,8 @@
     <select id="findUserByPhone" resultMap="userMap" parameterType="java.lang.String" >
       SELECT * FROM user WHERE user_phone = #{phone}
     </select>
-    <select id="findUserByPwd" resultMap="userMap" parameterType="java.lang.String" >
-        SELECT * FROM user WHERE user_pwd = #{pwd}
+    <select id="findUserByPwd" resultMap="userMap" parameterType="hashMap" >
+        SELECT * FROM user WHERE user_pwd = #{pwd} and user_phone = #{phone}
     </select>
     <!--&lt;!&ndash;分页查询项目&ndash;&gt;-->
     <!--<select id="findProjectList" resultMap="projectMap" parameterType="java.util.Map">-->
