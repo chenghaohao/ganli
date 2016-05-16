@@ -106,10 +106,10 @@ public class EventService {
     @Transactional
     public Integer saveMerchant(Merchant merchant,List<Map<String,Object>> list){
         eventDao.saveMerchant(merchant);
-        if(list.size() < 1){
+        if(list.size() > 0){
             eventDao.insertImgs(list);
         }
-        return eventDao.saveMerchant(merchant);
+        return null;
     }
     public List<Merchant> findMerchantList(int start,int limit,Merchant merchant){
         return eventDao.findMerchantList(start, limit, merchant);
@@ -141,8 +141,8 @@ public class EventService {
     public Integer countRecordMerchant(String startTime,String endTime){
         return eventDao.countRecordMerchant(startTime, endTime, null);
     }
-    public Integer countMerchant(){
-        return eventDao.countMerchant();
+    public Integer countMerchant(Merchant merchant){
+        return eventDao.countMerchant(merchant);
     }
     /**
      * 获取今天的日期

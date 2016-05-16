@@ -154,10 +154,9 @@ public class ServiceController extends BaseController{
             }
 
             List<Map<String,Object>> imgsList = new ArrayList<Map<String, Object>>();
-            List<Map<String,Object>> imgs = merchant.getImgs();
+            String[] imgs = merchant.getImgs();
             if (imgs != null){
-                List<String> md5s = (List)imgs.get(0).get("md5");
-                for(String m: md5s){
+                for(String m: imgs){
                     Map<String,Object> map = new HashMap<String, Object>();
                     map.put("merchant_uid",merchant.getMerchantUid());
                     map.put("md5",m);
@@ -203,15 +202,20 @@ public class ServiceController extends BaseController{
         List<Object> datas = new ArrayList<Object>();
         for(Merchant merchant1:merchantList){
             List<Map<String,Object>> imgs2 = new ArrayList<Map<String, Object>>();
+            String[] imgs3 = null;
             for(Map<String, Object> map:imgs){
                 if(merchant1.getMerchantUid().equals(map.get("merchant_uid"))){
                     imgs2.add(map);
                 }
             }
-            merchant1.setImgs(imgs2);
+            imgs3 = new String[imgs2.size()];
+            for(int i = 0;i < imgs2.size();i++){
+                imgs3[i] = imgs2.get(i).get("md5") + "";
+            }
+            merchant1.setImgs(imgs3);
             datas.add(merchant1);
         }
-        Integer count = eventService.countMerchant();
+        Integer count = eventService.countMerchant(merchant);
         rm.setTotal(count);
         rm.setDatas(datas);
         return jsonpHandler(rm,callback);
@@ -340,44 +344,65 @@ public class ServiceController extends BaseController{
         }
     }
     @RequestMapping("countYear/{tp}")
-    public Object countYear(@PathVariable("tp")Integer tp,String callback){
+    public Object countYear(@PathVariable("tp")Integer tp,String data,String callback){
         rm = new ResponseMessage();
         try{
             List<Integer> list = null;
+            Map<String,Object> map = null;
+            List<Map<String,Object>> datas = null;
+            String[] dates = data.split(",");
             Calendar c = Calendar.getInstance();
             switch (tp){
                 case 1:
-                    list = new ArrayList<Integer>();
-                    for(int i = 1;i < 13;i++){
-                        if(i < 10){
-                            list.add(eventDao.findInstallYear(c.get(Calendar.YEAR) + "-0" + i));
-                        }else{
-                            list.add(eventDao.findInstallYear(c.get(Calendar.YEAR) + i + ""));
+                    map = new HashMap<String, Object>();
+                    datas = new ArrayList<Map<String, Object>>();
+                    for(String s:dates){
+                        list = new ArrayList<Integer>();
+                        for(int i = 1;i < 13;i++){
+                            if(i < 10){
+                                list.add(eventDao.findInstallYear(s + "-0" + i));
+                            }else{
+                                list.add(eventDao.findInstallYear(s + i + ""));
+                            }
                         }
+                        map.put(s, list);
                     }
+                    datas.add(map);
                     break;
                 case 2:
-                    list = new ArrayList<Integer>();
-                    for(int i = 1;i < 13;i++){
-                        if(i < 10){
-                            list.add(eventDao.findEventYear(c.get(Calendar.YEAR) + "-0" + i));
-                        }else{
-                            list.add(eventDao.findEventYear(c.get(Calendar.YEAR) + i + ""));
+                    map = new HashMap<String, Object>();
+                    datas = new ArrayList<Map<String, Object>>();
+                    for(String s:dates){
+                        list = new ArrayList<Integer>();
+                        for(int i = 1;i < 13;i++){
+                            if(i < 10){
+                                list.add(eventDao.findEventYear(s + "-0" + i));
+                            }else{
+                                list.add(eventDao.findEventYear(s + i + ""));
+                            }
                         }
+                        map.put(s, list);
                     }
+                    datas.add(map);
                     break;
                 case 3:
-                    list = new ArrayList<Integer>();
-                    for(int i = 1;i < 13;i++){
-                        if(i < 10){
-                            list.add(eventDao.findMerchantYear(c.get(Calendar.YEAR) + "-0" + i));
-                        }else{
-                            list.add(eventDao.findMerchantYear(c.get(Calendar.YEAR) + i + ""));
+                    map = new HashMap<String, Object>();
+                    datas = new ArrayList<Map<String, Object>>();
+                    for(String s:dates){
+                        list = new ArrayList<Integer>();
+                        for(int i = 1;i < 13;i++){
+                            if(i < 10){
+                                list.add(eventDao.findMerchantYear(s + "-0" + i));
+                            }else{
+                                list.add(eventDao.findMerchantYear(s + i + ""));
+                            }
                         }
+                        map.put(s, list);
                     }
+                    datas.add(map);
                     break;
             }
-            rm.setData(list);
+            rm.setData(datas);
             return jsonpHandler(rm,callback);
         }catch (Exception e){
             rm.setCode("000001");

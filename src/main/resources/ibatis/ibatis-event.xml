@@ -280,8 +280,22 @@
             #{item.repayUid}
         </foreach>
     </delete>
-    <select id="countMerchant" resultType="int">
+    <select id="countMerchant" resultType="int" parameterType="com.ganli.entity.Merchant">
         SELECT count(merchant_uid) FROM merchant_list
+        <where>
+            <if test="merchantUid != '' and merchantUid != null">
+                and merchant_uid=#{merchantUid}
+            </if>
+            <if test="merchantLocation != '' and merchantLocation != null">
+                and merchant_location=#{merchantLocation}
+            </if>
+            <if test="merchantType != '' and merchantType != null">
+                and merchant_type=#{merchantType}
+            </if>
+            <if test="merchantName != '' and merchantName != null">
+                and merchant_name like CONCAT(CONCAT(#{merchantName}), '%')
+            </if>
+        </where>
     </select>
     <select id="countFeedback" resultType="int">
         SELECT count(feedback_uid) FROM feedback

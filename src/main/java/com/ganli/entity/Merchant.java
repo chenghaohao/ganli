@@ -16,7 +16,7 @@ public class Merchant implements Serializable{
     private String merchantLocation;        //商家地址
     private String merchantScore;           //商家评分
     private String merchantType;            //类型
-    private List<Map<String,Object>> imgs;      //图片数组
+    private String[] imgs;      //图片数组
 
     public String getMerchantUid() {
         return merchantUid;
@@ -82,11 +82,11 @@ public class Merchant implements Serializable{
         this.merchantType = merchantType;
     }
 
-    public List<Map<String, Object>> getImgs() {
+    public String[] getImgs() {
         return imgs;
     }
 
-    public void setImgs(List<Map<String, Object>> imgs) {
+    public void setImgs(String[] imgs) {
         this.imgs = imgs;
     }
 

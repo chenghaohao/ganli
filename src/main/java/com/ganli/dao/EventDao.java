@@ -63,8 +63,8 @@ public class EventDao extends BaseDao{
     public List<Map<String,Object>> findUserList(int start,int limit,User user){
         return this.getSqlSession().selectList(NAMESPACE + ".findUserList",user, new RowBounds(start, limit));
     }
-    public Integer countMerchant(){
-        return this.getSqlSession().selectOne(NAMESPACE + ".countMerchant");
+    public Integer countMerchant(Merchant merchant){
+        return this.getSqlSession().selectOne(NAMESPACE + ".countMerchant",merchant);
     }
     public Integer countFeedback(){
         return this.getSqlSession().selectOne(NAMESPACE + ".countFeedback");
