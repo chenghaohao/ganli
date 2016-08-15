@@ -8,6 +8,7 @@
         <result column="user_phone" property="userPhone" jdbcType="VARCHAR"/>
         <result column="user_location" property="userLocation" jdbcType="VARCHAR"/>
         <result column="user_pwd" property="userPwd" jdbcType="VARCHAR"/>
+        <result column="img" property="img" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--没有即插入新用户有则更新旧用户-->
@@ -17,13 +18,13 @@
             <if test="userUid != null and userUid != ''">
                 user_uid,
             </if>
-            user_name,user_sex,user_phone,user_location,user_pwd
+            user_name,user_sex,user_phone,user_location,user_pwd,img,create_time
         </trim>
         <trim prefix="values(" suffix=")" suffixOverrides=",">
             <if test="userUid != null and userUid != ''">
                 #{userUid},
             </if>
-            #{userName},#{userSex},#{userPhone},#{userLocation},#{userPwd}
+            #{userName},#{userSex},#{userPhone},#{userLocation},#{userPwd},#{img},now()
         </trim>
         ON DUPLICATE KEY UPDATE
         <trim suffixOverrides=",">
@@ -40,7 +41,10 @@
                 user_location=#{userLocation},
             </if>
             <if test="userPwd != null and userPwd != ''">
-                user_pwd=#{userPwd}
+                user_pwd=#{userPwd},
+            </if>
+            <if test="img != null and img != ''">
+                img=#{img}
             </if>
         </trim>
     </insert>

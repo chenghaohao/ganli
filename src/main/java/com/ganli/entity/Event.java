@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class Event implements Serializable{
     private String eventUid;                //事件uuid
     private String eventName;               //事件名称
-    private Integer eventType;              //事件类型
+    private Integer eventType;              //事件类型 1收礼2还礼
     private String eventLocation;           //事件地址
     private String eventTime;               //事件发生时间
     private String userUid;                 //用户uuid

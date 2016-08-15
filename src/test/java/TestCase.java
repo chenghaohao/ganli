@@ -1,9 +1,11 @@
+import com.alibaba.fastjson.JSONObject;
 import com.ganli.common.util.Constants;
 import com.ganli.common.util.SendMsgUtil;
 import com.ganli.dao.EventDao;
 import com.ganli.dao.Test;
 import com.ganli.dao.UserDao;
 import com.ganli.entity.*;
+import com.ganli.service.EventService;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +33,8 @@ public class TestCase {
     UserDao userDao;
     @Resource
     EventDao eventDao;
+    @Resource
+    EventService eventService;
     @org.junit.Test
     public void test1(){
         test.test();
@@ -192,8 +196,8 @@ public class TestCase {
     }
     @org.junit.Test
     public void countMerchant(){
-        int count = eventDao.countMerchant();
-        System.out.print(count);
+//        int count = eventDao.countMerchant();
+//        System.out.print(count);
     }
     @org.junit.Test
     public void findFeedBck(){
@@ -224,5 +228,33 @@ public class TestCase {
 //        Integer count = eventDao.findEventYear(param);
 //        System.out.print(count);
     }
-
+    @org.junit.Test
+    public void about(){
+        JSONObject data = new JSONObject();
+//        data.put("id","1");
+        data.put("name", "123");
+        data.put("hotline","120");
+        data.put("img", "123");
+        data.put("remark", "123");
+        eventService.insertAbout(data);
+        List<Map<String,Object>> maps = eventDao.findAbout();
+        System.out.print(maps.size());
+    }
+    @org.junit.Test
+    public void delImgs(){
+        JSONObject data = new JSONObject();
+        String[] str = new String[2];
+        str[0] = "e8d6a49b7586693f63b2126676bea2e1";
+        str[1] = "123";
+        data.put("merchantUid","bb81f6cf-b2d3-4d3a-a908-f8fede725835");
+        data.put("md5", str);
+        eventService.delMImgs(data);
+    }
+    @org.junit.Test
+    public void translate(){
+        //时间戳转化为Sting或Date
+        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd");
+        String d = format.format(1463500800000L);
+        System.out.println("Format To String(Date):"+d);
+    }
 }

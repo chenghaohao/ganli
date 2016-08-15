@@ -100,6 +100,35 @@ public class UserController extends BaseController{
             return  jsonpHandler(rm,callback);
         }
     }
+    @RequestMapping("forgetPwd")
+    public Object forgetPwd(String data){
+        rm = new ResponseMessage();
+        try{
+            User user = JSONObject.parseObject(data,User.class);
+            if(user.getUserPwd() == null || user.getUserPhone() == null){
+                rm.setCode("000002");
+                rm.setMsg("用户密码或手机号不能为空");
+                return rm;
+            }
+            if(user.getUserPhone() != null){
+                User u = userService.findUserByPhone(user.getUserPhone());
+                if(u == null){
+                    rm.setCode("000002");
+                    rm.setMsg("用户不存在");
+                    return rm;
+                }
+                u.setUserPwd(user.getUserPwd());
+                userService.saveUser(u);
+            }
+
+        }catch (Exception e){
+            log.info(e.getMessage());
+            rm.setMsg("系统错误");
+            rm.setCode("100001");
+            return rm;
+        }
+        return rm;
+    }
 
     /**
      * 检测用户是否存在

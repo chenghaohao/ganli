@@ -2,9 +2,11 @@ package com.ganli.dao;
 
 import com.ganli.entity.*;
 import com.github.pagehelper.PageHelper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Repository;
 
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,11 +44,20 @@ public class EventDao extends BaseDao{
     public List<Event> findEventList(String uid) {     //通过用户id查询事件列表
         return this.getSqlSession().selectList(NAMESPACE + ".findEventList", uid);
     }
-    public List<GiftList> findGiftList(String uid){     //通过用户id查询收礼单列表
-        return this.getSqlSession().selectList(NAMESPACE + ".findGiftList", uid);
+    public List<GiftList> findGiftList(String uid, Integer start, Integer limit){     //通过用户id查询收礼单列表
+        if(start == null || limit == null)
+            return this.getSqlSession().selectList(NAMESPACE + ".findGiftList", uid);
+        else
+            return this.getSqlSession().selectList(NAMESPACE + ".findGiftList", uid, new RowBounds(start, limit));
+    }
+    public Integer countGiftList(String uid){
+        return this.getSqlSession().selectOne(NAMESPACE + ".countGiftList", uid);
     }
     public List<RepayList> findRepayList(String uid){   //通过用户id查询还礼单列表
         return this.getSqlSession().selectList(NAMESPACE + ".findRepayList", uid);
+    }
+    public Integer countRepayList(String uid){
+        return this.getSqlSession().selectOne(NAMESPACE + ".countRepayList", uid);
     }
     public Integer saveFeedBack(FeedBack feedBack){     //保存反馈信息
         return this.getSqlSession().insert(NAMESPACE + ".saveFeedBack", feedBack);
@@ -63,23 +74,36 @@ public class EventDao extends BaseDao{
     public List<Map<String,Object>> findUserList(int start,int limit,User user){
         return this.getSqlSession().selectList(NAMESPACE + ".findUserList",user, new RowBounds(start, limit));
     }
+    public Integer coutUser(){
+        return  this.getSqlSession().selectOne(NAMESPACE + ".coutUser");
+    }
     public Integer countMerchant(Merchant merchant){
-        return this.getSqlSession().selectOne(NAMESPACE + ".countMerchant",merchant);
+        return this.getSqlSession().selectOne(NAMESPACE + ".countMerchant", merchant);
     }
     public Integer countFeedback(){
         return this.getSqlSession().selectOne(NAMESPACE + ".countFeedback");
     }
-    public Integer insertRecordInstall(String phoneId){     //插入装机统计
-        return this.getSqlSession().insert(NAMESPACE + ".insertRecordInstall", phoneId);
+    public Integer insertRecordInstall(String phoneId,String location, String phone){     //插入装机统计
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("phoneId", phoneId);
+        map.put("location", location);
+        map.put("phone", phone);
+        return this.getSqlSession().insert(NAMESPACE + ".insertRecordInstall", map);
     }
-    public Integer insertRecordEvent(String phoneId,String type){  //插入新建事件统计
+    public Integer insertRecordEvent(String phoneId,String type,String location, String phone){  //插入新建事件统计
         Map<String,Object> map = new HashMap<String, Object>();
         map.put("phoneId",phoneId);
         map.put("type",type);
+        map.put("location", location);
+        map.put("phone", phone);
         return this.getSqlSession().insert(NAMESPACE+".insertRecordEvent",map);
     }
-    public Integer insertRecordMerchant(String phoneId){
-        return this.getSqlSession().insert(NAMESPACE+".insertRecordMerchant",phoneId);
+    public Integer insertRecordMerchant(String phoneId,String location, String phone){
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("phoneId", phoneId);
+        map.put("location", location);
+        map.put("phone", phone);
+        return this.getSqlSession().insert(NAMESPACE+".insertRecordMerchant",map);
     }
     public Integer countRecordInstall(String startTime,String endTime,String phoneId){
         Map<String,Object> map = new HashMap<String, Object>();
@@ -143,5 +167,23 @@ public class EventDao extends BaseDao{
     }
     public Integer findMerchantYear(String date){
         return this.getSqlSession().selectOne(NAMESPACE+".findMerchantYear",date);
+    }
+    public Integer insertAbout(Map<String,Object> map){
+        return this.getSqlSession().insert(NAMESPACE + ".insertAbout", map);
+    }
+    public List<Map<String,Object>> findAbout(){
+        return this.getSqlSession().selectList(NAMESPACE + ".findAbout");
+    }
+    public Integer deleteImgs(String id){
+        return this.getSqlSession().delete(NAMESPACE + ".deleteImgs", id);
+    }
+    public Integer delMImgs(Map<String,Object> map){
+        return this.getSqlSession().delete(NAMESPACE+".delMImgs",map);
+    }
+    public Integer countInstall(String date){
+        return this.getSqlSession().selectOne(NAMESPACE + ".countInstall", date);
+    }
+    public List<Map<String, Object>> findGifts(String uId){
+        return this.getSqlSession().selectList(NAMESPACE + ".findGifts", uId);
     }
 }

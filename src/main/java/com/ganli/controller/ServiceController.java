@@ -4,12 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ganli.common.entity.ResponseMessage;
+import com.ganli.common.util.CommonUtils;
 import com.ganli.common.util.Constants;
 import com.ganli.common.util.HttpClientUtil;
 import com.ganli.dao.EventDao;
+import com.ganli.dao.UserDao;
 import com.ganli.entity.*;
 import com.ganli.service.EventService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -37,6 +40,8 @@ public class ServiceController extends BaseController{
     EventService eventService;
     @Resource
     EventDao eventDao;
+    @Resource
+    UserDao userDao;
 
     /**
      * 同步上传数据
@@ -123,7 +128,7 @@ public class ServiceController extends BaseController{
     @RequestMapping("syncDownload")
     public Object syncDownload(String data,String callback){
         rm = new ResponseMessage();
-        User user= JSONObject.parseObject(data,User.class);
+        User user= JSONObject.parseObject(data, User.class);
         rm.setEvent(eventService.findEvents(user.getUserUid()));
         rm.setGift(eventService.findGifts(user.getUserUid()));
         rm.setRepay(eventService.findRepays(user.getUserUid()));
@@ -188,6 +193,9 @@ public class ServiceController extends BaseController{
         int limit = Integer.valueOf(obj.getString("limit"));
         Merchant merchant = JSONObject.parseObject(obj.getString("merchant"), Merchant.class);
         List merchants = eventService.findMerchantList(start, limit, merchant);
+        if(merchants.size() == 0){
+            return jsonpHandler(rm,callback);
+        }
         List<Merchant> merchantList = new ArrayList<Merchant>();
         List<String> merchantIds = new ArrayList<String>();
         Merchant m = null;
@@ -234,9 +242,15 @@ public class ServiceController extends BaseController{
         int start = Integer.valueOf(obj.getString("start")) - 1;
         int limit = Integer.valueOf(obj.getString("limit"));
         List feedbacks = eventDao.findFeedBckList(start, limit, null);
+        List<Map<String,String>> mapList = new ArrayList<Map<String, String>>();
+        for(Object o: feedbacks){
+            Map<String,String> map = (Map)o;
+            map.put("c_time", String.valueOf(map.get("c_time")));
+            mapList.add(map);
+        }
         Integer count = eventDao.countFeedback();
         rm.setTotal(count);
-        rm.setDatas(feedbacks);
+        rm.setData(mapList);
         return jsonpHandler(rm,callback);
     }
     @RequestMapping("findUserList")
@@ -246,9 +260,15 @@ public class ServiceController extends BaseController{
         int start = Integer.valueOf(obj.getString("start")) - 1;
         int limit = Integer.valueOf(obj.getString("limit"));
         List users = eventDao.findUserList(start, limit, null);
-        Integer count = eventDao.countFeedback();
+        List<Map<String,String>> mapList = new ArrayList<Map<String, String>>();
+        for(Object o: users){
+            Map<String,String> map = (Map)o;
+            map.put("create_time", String.valueOf(map.get("create_time")));
+            mapList.add(map);
+        }
+        Integer count = eventDao.coutUser();
         rm.setTotal(count);
-        rm.setDatas(users);
+        rm.setData(mapList);
         return jsonpHandler(rm,callback);
     }
     /**
@@ -261,18 +281,20 @@ public class ServiceController extends BaseController{
      */
     @RequestMapping("record/{tp}")
     public Object recordService(@PathVariable("tp") Integer tp,
-                                @RequestParam(defaultValue = "", required = false) String type, String phoneId,String callback) {
+                                @RequestParam(defaultValue = "", required = false) String type, String phoneId,String callback,
+                                @RequestParam(defaultValue = "", required = false) String phone,
+                                @RequestParam(defaultValue = "",required = false) String location) {
         rm = new ResponseMessage();
         try {
             switch (tp) {
                 case 1:
-                    eventService.insertRecordInstall(phoneId);
+                    eventService.insertRecordInstall(phoneId, location, phone);
                     break;
                 case 2:
-                    eventService.insertRecordEvent(phoneId, type);
+                    eventService.insertRecordEvent(phoneId, type, location, phone);
                     break;
                 case 3:
-                    eventService.insertRecordMerchant(phoneId);
+                    eventService.insertRecordMerchant(phoneId,phone,location);
                     break;
             }
             return jsonpHandler(rm,callback);
@@ -337,11 +359,34 @@ public class ServiceController extends BaseController{
             }
             rm.setData(count);
             return jsonpHandler(rm,callback);
-        }catch (Exception e){
+        }catch (Exception e) {
             rm.setCode("000001");
             rm.setMsg("系统异常");
             return jsonpHandler(rm,callback);
         }
+    }
+
+    /**
+     * 获取装机总量
+     * @param tp  0:总量  1：新增
+     * @return
+     */
+    @RequestMapping("countInstall/{tp}")
+    public Object countInstall(@PathVariable("tp")Integer tp){
+        rm = new ResponseMessage();
+        Integer all = eventDao.countInstall(null); //去重获取装机总量
+        switch (tp){
+            case 0: rm.setData(all);break;
+            case 1:
+                Date d = new Date();
+                SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd");
+                String date = sdf.format(d);
+                Integer yesterday = eventDao.countInstall(date);
+                Integer newInstall = all - yesterday;
+                rm.setData(newInstall);
+                break;
+        }
+        return rm;
     }
     @RequestMapping("countYear/{tp}")
     public Object countYear(@PathVariable("tp")Integer tp,String data,String callback){
@@ -449,6 +494,75 @@ public class ServiceController extends BaseController{
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        return jsonpHandler(rm,callback);
+        return jsonpHandler(rm, callback);
+    }
+    @RequestMapping("aboutSave")
+    public Object about(String data,String callback){
+        rm = new ResponseMessage();
+        try{
+            JSONObject obj = JSONObject.parseObject(data);
+            if(obj == null){
+                rm.setCode("000001");
+                rm.setMsg("参数不能为空");
+                return jsonpHandler(rm,callback);
+            }
+            if(StringUtils.isEmpty(obj.getString("id"))){
+                List<Map<String,Object>> maps = eventDao.findAbout();
+                if(maps.size() > 0){
+                    rm.setCode("000001");
+                    rm.setMsg("数据库已存在，只能修改");
+                    return jsonpHandler(rm,callback);
+                }
+            }
+            eventService.insertAbout(obj);
+        }catch (Exception e){
+            rm.setCode("000001");
+            rm.setMsg("系统异常");
+            return jsonpHandler(rm,callback);
+        }
+        return jsonpHandler(rm, callback);
+    }
+    @RequestMapping("aboutFind")
+    public Object findAbout(){
+        rm = new ResponseMessage();
+        List<Map<String,Object>> maps = eventDao.findAbout();
+        rm.setData(maps);
+        return jsonpHandler(rm,null);
+    }
+    @RequestMapping("delMImgs")
+    public Object delMImgs(String data){
+        rm = new ResponseMessage();
+        try{
+            JSONObject obj = JSONObject.parseObject(data);
+            eventService.delMImgs(obj);
+        }catch (Exception e){
+            rm.setCode("000001");
+            rm.setMsg("系统异常");
+            return jsonpHandler(rm,null);
+        }
+        return jsonpHandler(rm,null);
+    }
+    @RequestMapping("findUserData")
+    public Object findUserData(String data){
+        rm = new ResponseMessage();
+        JSONObject jsonObject = JSONObject.parseObject(data);
+        User user = userDao.findUserByPhone(jsonObject.getString("phone"));
+        if(user == null){
+            rm.setMsg("用户不存在");
+            rm.setCode("000001");
+        }else{
+            if("gift".equals(jsonObject.getString("tp"))){
+                List<GiftList> giftLists = eventDao.findGiftList(user.getUserUid(),null, null);
+                Integer count = eventDao.countGiftList(user.getUserUid());
+                rm.setTotal(count);
+                rm.setData(giftLists);
+            }else if("repay".equals(jsonObject.getString("tp"))){
+                List<RepayList> repayLists = eventDao.findRepayList(user.getUserUid());
+                Integer count = eventDao.countRepayList(user.getUserUid());
+                rm.setTotal(count);
+                rm.setData(repayLists);
+            }
+        }
+        return rm;
     }
 }

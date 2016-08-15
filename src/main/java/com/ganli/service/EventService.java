@@ -1,5 +1,6 @@
 package com.ganli.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ganli.dao.EventDao;
 import com.ganli.entity.*;
 import org.slf4j.Logger;
@@ -9,10 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by hao.cheng on 2016/3/15.
@@ -94,7 +92,7 @@ public class EventService {
         return eventDao.findEventList(uid);
     }
     public List<GiftList> findGifts(String uid){
-        return eventDao.findGiftList(uid);
+        return eventDao.findGiftList(uid, null, null);
     }
     public List<RepayList> findRepays(String uid){
         return eventDao.findRepayList(uid);
@@ -107,6 +105,7 @@ public class EventService {
     public Integer saveMerchant(Merchant merchant,List<Map<String,Object>> list){
         eventDao.saveMerchant(merchant);
         if(list.size() > 0){
+            eventDao.deleteImgs(merchant.getMerchantUid());
             eventDao.insertImgs(list);
         }
         return null;
@@ -115,22 +114,22 @@ public class EventService {
         return eventDao.findMerchantList(start, limit, merchant);
     }
     @Transactional
-    public Integer insertRecordInstall(String phoneId){
+    public Integer insertRecordInstall(String phoneId,String location, String phone){
         if(eventDao.countRecordInstall(getToday(),getToday(),phoneId) != 0){
             return null;
         }
-        return eventDao.insertRecordInstall(phoneId);
+        return eventDao.insertRecordInstall(phoneId,location,phone);
     }
     @Transactional
-    public Integer insertRecordEvent(String phoneId,String type){
-        return eventDao.insertRecordEvent(phoneId, type);
+    public Integer insertRecordEvent(String phoneId,String type,String location,String phone){
+        return eventDao.insertRecordEvent(phoneId, type, location, phone);
     }
     @Transactional
-    public Integer insertRecordMerchant(String phoneId){
+    public Integer insertRecordMerchant(String phoneId,String phone,String location){
         if(eventDao.countRecordMerchant(getToday(),getToday(),phoneId) != 0){
             return null;
         }
-        return eventDao.insertRecordMerchant(phoneId);
+        return eventDao.insertRecordMerchant(phoneId, location, phone);
     }
     public Integer  countRecordInstall(String startTime,String endTime){
         return eventDao.countRecordInstall(startTime, endTime, null);
@@ -171,5 +170,22 @@ public class EventService {
         Date date = new Date();
         date.getYear();
         return null;
+    }
+    @Transactional
+    public Integer insertAbout(JSONObject data){
+        Map<String,Object> map = new HashMap<String, Object>();
+        map.put("id",data.get("id"));
+        map.put("name",data.get("name"));
+        map.put("hotline",data.get("hotline"));
+        map.put("img",data.get("img"));
+        map.put("remark", data.get("remark"));
+        return eventDao.insertAbout(map);
+    }
+    @Transactional
+    public Integer delMImgs(JSONObject data){
+        Map<String,Object> map = new HashMap<String, Object>();
+        map.put("merchantUid",data.get("merchantUid"));
+        map.put("md5",data.getJSONArray("md5"));
+        return eventDao.delMImgs(map);
     }
 }

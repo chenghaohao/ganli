@@ -14,6 +14,7 @@ public class User implements Serializable{
     private String userPhone;               //用户电话
     private String userLocation;            //用户住址
     private String userPwd;                 //用户登录密码
+    private String img;     //头像
 
     public String getUserUid() {
         return userUid;
@@ -63,15 +64,24 @@ public class User implements Serializable{
         this.userPwd = userPwd;
     }
 
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "userUid='" + userUid + '\'' +
                 ", userName='" + userName + '\'' +
-                ", sex=" + userSex +
+                ", userSex=" + userSex +
                 ", userPhone='" + userPhone + '\'' +
                 ", userLocation='" + userLocation + '\'' +
                 ", userPwd='" + userPwd + '\'' +
+                ", img='" + img + '\'' +
                 '}';
     }
 }

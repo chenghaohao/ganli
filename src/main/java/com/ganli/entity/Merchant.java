@@ -1,6 +1,7 @@
 package com.ganli.entity;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ public class Merchant implements Serializable{
     private String merchantScore;           //商家评分
     private String merchantType;            //类型
     private String[] imgs;      //图片数组
+    private String merchantPrice;   //商家价格
 
     public String getMerchantUid() {
         return merchantUid;
@@ -90,6 +92,14 @@ public class Merchant implements Serializable{
         this.imgs = imgs;
     }
 
+    public String getMerchantPrice() {
+        return merchantPrice;
+    }
+
+    public void setMerchantPrice(String merchantPrice) {
+        this.merchantPrice = merchantPrice;
+    }
+
     @Override
     public String toString() {
         return "Merchant{" +
@@ -101,7 +111,8 @@ public class Merchant implements Serializable{
                 ", merchantLocation='" + merchantLocation + '\'' +
                 ", merchantScore='" + merchantScore + '\'' +
                 ", merchantType='" + merchantType + '\'' +
-                ", imgs=" + imgs +
+                ", imgs=" + Arrays.toString(imgs) +
+                ", merchantPrice='" + merchantPrice + '\'' +
                 '}';
     }
 }

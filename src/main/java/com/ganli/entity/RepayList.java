@@ -2,6 +2,7 @@ package com.ganli.entity;
 
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.Date;
 
 /**
  * Created by hao.cheng on 2016/3/11.
@@ -17,6 +18,7 @@ public class RepayList implements Serializable {
     private String eventUid;                //还礼单对应的事件id
     private String userUid;                 //用户id
     private Integer status;             //还礼单状态
+    private String repayTime;         //还礼时间
 
     public String getRepayUid() {
         return repayUid;
@@ -82,6 +84,14 @@ public class RepayList implements Serializable {
         this.status = status;
     }
 
+    public String getRepayTime() {
+        return repayTime;
+    }
+
+    public void setRepayTime(String repayTime) {
+        this.repayTime = repayTime;
+    }
+
     @Override
     public String toString() {
         return "RepayList{" +
@@ -91,6 +101,9 @@ public class RepayList implements Serializable {
                 ", repayRemark='" + repayRemark + '\'' +
                 ", giftUid='" + giftUid + '\'' +
                 ", eventUid='" + eventUid + '\'' +
+                ", userUid='" + userUid + '\'' +
+                ", status=" + status +
+                ", repayTime='" + repayTime + '\'' +
                 '}';
     }
 }

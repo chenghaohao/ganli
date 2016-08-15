@@ -35,6 +35,7 @@
         <result column="gift_uid" property="giftUid" jdbcType="VARCHAR"/>
         <result column="event_uid" property="eventUid" jdbcType="VARCHAR"/>
         <result column="user_uid" property="userUid" jdbcType="VARCHAR"/>
+        <result column="repay_time" property="repayTime" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
     </resultMap>
     <resultMap id="merchantMap" type="com.ganli.entity.Merchant">
@@ -46,6 +47,7 @@
         <result column="merchant_location" property="merchantLocation" jdbcType="VARCHAR"/>
         <result column="merchant_score" property="merchantScore" jdbcType="VARCHAR"/>
         <result column="merchant_type" property="merchantType" jdbcType="VARCHAR"/>
+        <result column="merchant_price" property="merchantPrice" jdbcType="VARCHAR"/>
     </resultMap>
     <resultMap id="imgMap" type="Map">
         <id property="imgId" column="img_id" />
@@ -90,10 +92,10 @@
             SELECT
             LAST_INSERT_ID()
         </selectKey>
-        INSERT INTO repay_list(repay_uid,repay_person,repay_money,repay_remark,gift_uid,event_uid,user_uid,status)
+        INSERT INTO repay_list(repay_uid,repay_person,repay_money,repay_remark,gift_uid,event_uid,user_uid,repay_time,status)
         VALUES
         <foreach collection="list" item="item" index="index" separator="," >
-            (#{item.repayUid},#{item.repayPerson},#{item.repayMoney},#{item.repayRemark},#{item.giftUid},#{item.eventUid},#{item.userUid},0)
+            (#{item.repayUid},#{item.repayPerson},#{item.repayMoney},#{item.repayRemark},#{item.giftUid},#{item.eventUid},#{item.userUid},#{item.repayTime,jdbcType=DATE},0)
         </foreach>
     </insert>
     <!--删除事件-->
@@ -115,8 +117,14 @@
     <select id="findGiftList" parameterType="string" resultMap="giftMap">
         SELECT * FROM gift_list where user_uid=#{uid}
     </select>
+    <select id="countGiftList" parameterType="string" resultType="int">
+        SELECT count(gift_uid) FROM gift_list where user_uid=#{uid}
+    </select>
     <select id="findRepayList" parameterType="string" resultMap="repayMap">
         SELECT * FROM repay_list WHERE user_uid=#{uid}
+    </select>
+    <select id="countRepayList" parameterType="string" resultType="int">
+        SELECT count(repay_uid) FROM repay_list WHERE user_uid=#{uid}
     </select>
     
     <insert id="saveFeedBack" parameterType="com.ganli.entity.FeedBack">
@@ -124,9 +132,9 @@
     </insert>
 
     <insert id="saveMerchant" parameterType="com.ganli.entity.Merchant" useGeneratedKeys="true">
-        INSERT INTO merchant_list(merchant_uid,merchant_name,merchant_img,merchant_desc,merchant_phone,merchant_location,merchant_score,merchant_type)
+        INSERT INTO merchant_list(merchant_uid,merchant_name,merchant_img,merchant_desc,merchant_phone,merchant_location,merchant_score,merchant_type,merchant_price)
         VALUES
-        (#{merchantUid},#{merchantName},#{merchantImg},#{merchantDesc},#{merchantPhone},#{merchantLocation},#{merchantScore},#{merchantType})
+        (#{merchantUid},#{merchantName},#{merchantImg},#{merchantDesc},#{merchantPhone},#{merchantLocation},#{merchantScore},#{merchantType},#{merchantPrice})
         ON DUPLICATE KEY UPDATE
         merchant_name=#{merchantName},
         merchant_img=#{merchantImg},
@@ -134,7 +142,8 @@
         merchant_phone=#{merchantPhone},
         merchant_location=#{merchantLocation},
         merchant_score=#{merchantScore},
-        merchant_type=#{merchantType}
+        merchant_type=#{merchantType},
+        merchant_price=#{merchantPrice}
     </insert>
     <select id="findMerchantList" resultMap="merchantMap" >
         SELECT m.* FROM merchant_list m
@@ -143,7 +152,7 @@
                 and m.merchant_uid=#{merchantUid}
             </if>
             <if test="merchantLocation != '' and merchantLocation != null">
-               and m.merchant_location=#{merchantLocation}
+                and m.merchant_location like CONCAT(CONCAT('%',#{merchantLocation}), '%')
             </if>
             <if test="merchantType != '' and merchantType != null">
                 and m.merchant_type=#{merchantType}
@@ -161,24 +170,29 @@
         </foreach>
     </select>
     <select id="findFeedBckList" resultType="map" >
-        SELECT f.*,u.user_name,u.user_phone FROM feedback f,user u WHERE f.user_uid=u.user_uid order BY f.c_time DESC
+--         SELECT f.*,u.user_name,u.user_phone FROM feedback f,user u
+--         WHERE f.user_uid=u.user_uid or f.user_uid is NULL
+--         order BY f.c_time DESC
+        SELECT * from feedback f
+        LEFT JOIN `user` u ON f.user_uid=u.user_uid
+                order BY f.c_time DESC
     </select>
 
     <select id="findUserList" resultType="map" >
-        SELECT u.* FROM user u
+        SELECT u.* FROM user u order BY create_time DESC
     </select>
     
     <insert id="insertRecordInstall" parameterType="string">
-        INSERT INTO record_install(phone_id,record_time) VALUES (#{phoneId},now())
+        INSERT INTO record_install(phone_id,record_time,location,phone) VALUES (#{phoneId},now(),#{location},#{phone})
     </insert>
     <insert id="insertRecordEvent" parameterType="hashMap">
-        INSERT INTO record_event(phone_id,`type`,record_time) VALUES (#{phoneId},#{type},now())
+        INSERT INTO record_event(phone_id,`type`,record_time,location,phone) VALUES (#{phoneId},#{type},now(),#{location},#{phone})
     </insert>
     <insert id="insertRecordMerchant" parameterType="string">
-        INSERT INTO record_merchant(phone_id,record_time) VALUES (#{phoneId},now())
+        INSERT INTO record_merchant(phone_id,record_time,location,phone) VALUES (#{phoneId},now(),#{location},#{phone})
     </insert>
     <select id="countRecordInstall" resultType="int" parameterType="hashMap">
-        SELECT count(DISTINCT(phone_id)) FROM record_install
+        SELECT count(phone_id) FROM record_install
          <where>
              <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
                  record_time BETWEEN DATE_FORMAT( #{startTime,jdbcType=DATE}, '%Y-%m-%d') AND  DATE_FORMAT( #{endTime,jdbcType=DATE}, '%Y-%m-%d')
@@ -187,6 +201,7 @@
                  and phone_id=#{phoneId}
              </if>
          </where>
+<!--&#45;&#45;         SELECT count(phone_id) FROM record_install WHERE phone_id = #{phoneId} AND record_time like CONCAT(CONCAT(#{startTime}), '%')-->
     </select>
     <select id="countRecordEvent" resultType="int" parameterType="hashMap">
         SELECT count(id) FROM record_event
@@ -250,6 +265,7 @@
                 gift_uid=#{item.giftUid},
                 event_uid=#{item.eventUid},
                 user_uid=#{item.userUid},
+                repay_time=#{item.repayTime,jdbcType=DATE},
                 status=0
             </set>
             where repay_uid = #{item.repayUid}
@@ -287,7 +303,7 @@
                 and merchant_uid=#{merchantUid}
             </if>
             <if test="merchantLocation != '' and merchantLocation != null">
-                and merchant_location=#{merchantLocation}
+                and merchant_location like CONCAT(CONCAT('%',#{merchantLocation}), '%')
             </if>
             <if test="merchantType != '' and merchantType != null">
                 and merchant_type=#{merchantType}
@@ -299,6 +315,9 @@
     </select>
     <select id="countFeedback" resultType="int">
         SELECT count(feedback_uid) FROM feedback
+    </select>
+    <select id="coutUser" resultType="int">
+        SELECT COUNT(user_uid) FROM user
     </select>
     <delete id="deleteUser">
         DELETE FROM user WHERE user_uid=#{id}
@@ -332,5 +351,58 @@
         SELECT COUNT(id) FROM record_merchant WHERE record_time LIKE  CONCAT(CONCAT(#{date}), '%')
     </select>
 
-
+    <insert id="insertAbout" parameterType="Map">
+        INSERT into about_us
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">
+                id,
+            </if>
+            `name`,hotline,img,remark
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">
+                #{id},
+            </if>
+            #{name},#{hotline},#{img},#{remark}
+        </trim>
+        ON DUPLICATE KEY UPDATE
+        <trim suffixOverrides=",">
+            <if test="name != null and name != ''">
+                name=#{name},
+            </if>
+            <if test="hotline != null and hotline != ''">
+                hotline=#{hotline},
+            </if>
+            <if test="img != null and img != ''">
+                img=#{img},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark=#{remark},
+            </if>
+        </trim>
+    </insert>
+    <select id="findAbout" resultType="Map">
+      SELECT * FROM about_us
+    </select>
+    <delete id="deleteImgs" parameterType="string">
+        DELETE FROM imgs WHERE merchant_uid=#{id}
+    </delete>
+    <delete id="delMImgs" parameterType="Map">
+        DELETE FROM imgs WHERE merchant_uid=#{merchantUid} and md5 in
+        <foreach item="idItem" collection="md5" open="(" separator="," close=")">
+            #{idItem}
+        </foreach>
+    </delete>
+    <select id="countInstall" resultType="int">
+        SELECT count(DISTINCT(phone_id)) FROM record_install
+        <where>
+            <!-- 如果有if判断则进行下面的操作 -->
+            <if test="_parameter != null and _parameter != ''">
+               AND record_time &lt; #{_parameter}
+            </if>
+        </where>
+    </select>
+    <select id="findGifts" resultType="map">
+        SELECT * FROM gift_list WHERE user_uid = #{uId}
+    </select>
 </mapper>
